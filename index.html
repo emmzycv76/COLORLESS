@@ -9,80 +9,71 @@
     img { width:100%; max-width:600px; border:2px solid #fff; border-radius:12px; }
     .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
     button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
-    .color-swatch { width:60px; height:60px; margin:8px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
+    .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
   </style>
 </head>
 <body>
   <h1>🎨 ChromaArt</h1>
-  <p>Color ID & Mixer for Artists</p>
+  <p>Color ID & Mixer</p>
 
-  <!-- Image Upload -->
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
-  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo to Identify Colors</button>
+  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
 
   <img id="uploadedImage" style="display:none;" onclick="pickColor(event)">
 
   <div class="info">
-    <div id="colorBox" class="color-swatch" style="width:80px;height:80px"></div>
+    <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
     <h2 id="hex">#------</h2>
     <p id="rgb">RGB: ---</p>
     <p id="name">Color: ---</p>
   </div>
 
-  <!-- Independent Color Mixer -->
   <div class="mixer">
-    <h3>🎨 Independent Color Mixer</h3>
-    <p>Tap colors to add to mix:</p>
-    <div id="palette">
-      <!-- Swatches added by JS -->
-    </div>
-    <div id="mixedResult" style="margin:15px 0; font-size:18px;"></div>
-    <button onclick="clearMix()">Clear Mix</button>
+    <h3>🎨 Color Mixer (Tap to add)</h3>
+    <div id="palette"></div>
+    <div id="mixedResult" style="margin:20px 0; min-height:120px;"></div>
+    <button onclick="clearMix()">Clear Mixer</button>
   </div>
 
   <script>
     let pickedColors = [];
-    const basicPalette = [
-      {name:"Red", hex:"#FF0000"},
-      {name:"Blue", hex:"#0000FF"},
-      {name:"Yellow", hex:"#FFFF00"},
-      {name:"Green", hex:"#00FF00"},
-      {name:"Purple", hex:"#800080"},
-      {name:"Orange", hex:"#FF7F00"},
-      {name:"Black", hex:"#000000"},
-      {name:"White", hex:"#FFFFFF"},
-      {name:"Brown", hex:"#8B4513"},
-      {name:"Cyan", hex:"#00FFFF"}
+
+    const paletteColors = [
+      {name:"Red", hex:"#FF0000"}, {name:"Blue", hex:"#0000FF"}, {name:"Yellow", hex:"#FFFF00"},
+      {name:"Green", hex:"#00FF00"}, {name:"Purple", hex:"#800080"}, {name:"Orange", hex:"#FF7F00"},
+      {name:"Cyan", hex:"#00FFFF"}, {name:"Magenta", hex:"#FF00FF"}, {name:"Brown", hex:"#8B4513"},
+      {name:"Pink", hex:"#FFC0CB"}, {name:"Lime", hex:"#32CD32"}, {name:"Teal", hex:"#008080"},
+      {name:"Indigo", hex:"#4B0082"}, {name:"Gold", hex:"#FFD700"}, {name:"Silver", hex:"#C0C0C0"}
     ];
 
-    // Create palette
+    // Build palette
     const paletteDiv = document.getElementById('palette');
-    basicPalette.forEach(color => {
-      const swatch = document.createElement('div');
-      swatch.className = 'color-swatch';
-      swatch.style.backgroundColor = color.hex;
-      swatch.title = color.name;
-      swatch.onclick = () => addToMix(color);
-      paletteDiv.appendChild(swatch);
+    paletteColors.forEach(c => {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch';
+      sw.style.background = c.hex;
+      sw.title = c.name;
+      sw.onclick = () => addToMix(c);
+      paletteDiv.appendChild(sw);
     });
 
-    function addToMix(color) {
-      pickedColors.push(color);
-      if (pickedColors.length > 6) pickedColors.shift();
-      updateMixedColor();
+    function addToMix(c) {
+      pickedColors.push(c);
+      if (pickedColors.length > 8) pickedColors.shift();
+      updateMix();
     }
 
-    function updateMixedColor() {
+    function updateMix() {
       if (pickedColors.length === 0) {
-        document.getElementById('mixedResult').innerHTML = '';
+        document.getElementById('mixedResult').innerHTML = '<p>No colors mixed yet</p>';
         return;
       }
-      let r = 0, g = 0, b = 0;
+      let r=0, g=0, b=0;
       pickedColors.forEach(c => {
-        const hex = c.hex.replace('#','');
-        r += parseInt(hex.substr(0,2), 16);
-        g += parseInt(hex.substr(2,2), 16);
-        b += parseInt(hex.substr(4,2), 16);
+        const h = c.hex.replace('#','');
+        r += parseInt(h.substr(0,2),16);
+        g += parseInt(h.substr(2,2),16);
+        b += parseInt(h.substr(4,2),16);
       });
       r = Math.floor(r / pickedColors.length);
       g = Math.floor(g / pickedColors.length);
@@ -90,26 +81,26 @@
       const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
 
       document.getElementById('mixedResult').innerHTML = `
-        <div class="color-swatch" style="background:${hex}; width:100px; height:100px"></div>
-        <p><strong>Mixed Color:</strong> ${hex}</p>
+        <div class="color-swatch" style="background:${hex}; width:110px; height:110px; margin:10px auto"></div>
+        <strong>Mixed: ${hex}</strong>
       `;
     }
 
     function clearMix() {
       pickedColors = [];
-      updateMixedColor();
+      updateMix();
     }
 
-    // Image color picking (same as before)
+    // Image picking
     const img = document.getElementById('uploadedImage');
-    const canvas = document.getElementById('canvas') || document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    document.getElementById('fileInput').addEventListener('change', (e) => {
+    document.getElementById('fileInput').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = function(ev) {
+        reader.onload = ev => {
           img.src = ev.target.result;
           img.style.display = 'block';
         };
@@ -120,9 +111,35 @@
     img.onclick = pickColor;
 
     function pickColor(e) {
-      // ... (same improved picking logic as last version)
-      // For brevity, I'm keeping it short here. You can add the full pickColor from previous if needed.
-      alert("Color picked from image! (Full detection coming in next update)");
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+
+      const rect = img.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
+      const y = Math.floor((e.clientY - rect.top) * (img.height / rect.height));
+
+      const pixel = ctx.getImageData(x, y, 1, 1).data;
+      const r = pixel[0], g = pixel[1], b = pixel[2];
+      const hex = '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('').toUpperCase();
+
+      document.getElementById('colorBox').style.backgroundColor = hex;
+      document.getElementById('hex').textContent = hex;
+      document.getElementById('rgb').textContent = `RGB: ${r}, ${g}, ${b}`;
+      document.getElementById('name').textContent = `Color: ${getColorName(r,g,b)}`;
+    }
+
+    function getColorName(r, g, b) {
+      if (r > 200 && g < 100 && b < 100) return "Red";
+      if (g > 180 && r < 120 && b < 120) return "Green";
+      if (b > 180 && r < 120 && g < 120) return "Blue";
+      if (r > 200 && g > 170 && b < 100) return "Yellow";
+      if (r > 160 && g < 100 && b > 140) return "Purple";
+      if (r > 200 && g > 100 && b < 80) return "Orange";
+      if (r > 100 && g > 200 && b > 100) return "Lime Green";
+      if (r < 60 && g < 60 && b < 60) return "Black";
+      if (r > 220 && g > 220 && b > 220) return "White";
+      return "Custom Color";
     }
   </script>
 </body>
