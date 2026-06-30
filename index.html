@@ -14,7 +14,7 @@
 </head>
 <body>
   <h1>🎨 ChromaArt</h1>
-  <p>Color ID & Mixer</p>
+  <p>Color ID & Mixer - Oga Dev Edition</p>
 
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
   <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
@@ -29,7 +29,7 @@
   </div>
 
   <div class="mixer">
-    <h3>🎨 Color Mixer (Tap to add)</h3>
+    <h3>🎨 Color Mixer (Tap swatches)</h3>
     <div id="palette"></div>
     <div id="mixedResult" style="margin:20px 0; min-height:120px;"></div>
     <button onclick="clearMix()">Clear Mixer</button>
@@ -39,11 +39,13 @@
     let pickedColors = [];
 
     const paletteColors = [
-      {name:"Red", hex:"#FF0000"}, {name:"Blue", hex:"#0000FF"}, {name:"Yellow", hex:"#FFFF00"},
-      {name:"Green", hex:"#00FF00"}, {name:"Purple", hex:"#800080"}, {name:"Orange", hex:"#FF7F00"},
-      {name:"Cyan", hex:"#00FFFF"}, {name:"Magenta", hex:"#FF00FF"}, {name:"Brown", hex:"#8B4513"},
-      {name:"Pink", hex:"#FFC0CB"}, {name:"Lime", hex:"#32CD32"}, {name:"Teal", hex:"#008080"},
-      {name:"Indigo", hex:"#4B0082"}, {name:"Gold", hex:"#FFD700"}, {name:"Silver", hex:"#C0C0C0"}
+      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
+      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
+      {name:"Green", hex:"#00FF00"}, {name:"Lime Green", hex:"#32CD32"},
+      {name:"Blue", hex:"#0000FF"}, {name:"Ultramarine Blue", hex:"#3F00FF"},
+      {name:"Purple", hex:"#800080"}, {name:"Pink", hex:"#FF69B4"},
+      {name:"Brown", hex:"#8B4513"}, {name:"Black", hex:"#000000"},
+      {name:"White", hex:"#FFFFFF"}, {name:"Gray", hex:"#808080"}
     ];
 
     // Build palette
@@ -65,7 +67,7 @@
 
     function updateMix() {
       if (pickedColors.length === 0) {
-        document.getElementById('mixedResult').innerHTML = '<p>No colors mixed yet</p>';
+        document.getElementById('mixedResult').innerHTML = '<p>Tap colors above to mix</p>';
         return;
       }
       let r=0, g=0, b=0;
@@ -79,10 +81,9 @@
       g = Math.floor(g / pickedColors.length);
       b = Math.floor(b / pickedColors.length);
       const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
-
       document.getElementById('mixedResult').innerHTML = `
-        <div class="color-swatch" style="background:${hex}; width:110px; height:110px; margin:10px auto"></div>
-        <strong>Mixed: ${hex}</strong>
+        <div class="color-swatch" style="background:${hex}; width:110px; height:110px"></div>
+        <strong>Mixed Color: ${hex}</strong>
       `;
     }
 
@@ -91,7 +92,7 @@
       updateMix();
     }
 
-    // Image picking
+    // Image color detection
     const img = document.getElementById('uploadedImage');
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -100,10 +101,7 @@
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = ev => {
-          img.src = ev.target.result;
-          img.style.display = 'block';
-        };
+        reader.onload = ev => { img.src = ev.target.result; img.style.display = 'block'; };
         reader.readAsDataURL(file);
       }
     });
@@ -126,19 +124,29 @@
       document.getElementById('colorBox').style.backgroundColor = hex;
       document.getElementById('hex').textContent = hex;
       document.getElementById('rgb').textContent = `RGB: ${r}, ${g}, ${b}`;
-      document.getElementById('name').textContent = `Color: ${getColorName(r,g,b)}`;
+      document.getElementById('name').textContent = `Color: ${getColorName(r, g, b)}`;
     }
 
     function getColorName(r, g, b) {
-      if (r > 200 && g < 100 && b < 100) return "Red";
-      if (g > 180 && r < 120 && b < 120) return "Green";
-      if (b > 180 && r < 120 && g < 120) return "Blue";
-      if (r > 200 && g > 170 && b < 100) return "Yellow";
-      if (r > 160 && g < 100 && b > 140) return "Purple";
-      if (r > 200 && g > 100 && b < 80) return "Orange";
-      if (r > 100 && g > 200 && b > 100) return "Lime Green";
-      if (r < 60 && g < 60 && b < 60) return "Black";
-      if (r > 220 && g > 220 && b > 220) return "White";
+      const colors = {
+        "Red": r > 180 && g < 110 && b < 110,
+        "Cadmium Red": r > 200 && g < 80 && b < 80,
+        "Yellow": g > 180 && r > 180 && b < 100,
+        "Orange": r > 200 && g > 100 && b < 80,
+        "Green": g > 160 && r < 140 && b < 140,
+        "Lime Green": g > 200 && r < 140 && b < 140,
+        "Blue": b > 160 && r < 120 && g < 120,
+        "Ultramarine Blue": b > 140 && r < 80 && g < 120,
+        "Purple": r > 100 && g < 80 && b > 100,
+        "Pink": r > 200 && g < 140 && b > 140,
+        "Brown": r > 100 && g < 90 && b < 70,
+        "Black": r < 50 && g < 50 && b < 50,
+        "White": r > 220 && g > 220 && b > 220,
+        "Gray": Math.abs(r-g) < 30 && Math.abs(g-b) < 30 && r > 50 && r < 200
+      };
+      for (let name in colors) {
+        if (colors[name]) return name;
+      }
       return "Custom Color";
     }
   </script>
