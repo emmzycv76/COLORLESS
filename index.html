@@ -6,11 +6,12 @@
   <title>Colorless</title>
   <style>
     body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; }
-    img { width:100%; max-width:600px; border:2px solid #fff; border-radius:12px; position:relative; }
+    .container { position:relative; display:inline-block; max-width:600px; }
+    img { width:100%; border:2px solid #fff; border-radius:12px; }
+    .grid-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(transparent, transparent 19%, rgba(255,255,255,0.25) 20%, rgba(255,255,255,0.25) 20.5%); pointer-events:none; border:1px solid rgba(255,255,255,0.5); box-sizing:border-box; display:none; }
     .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
     button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
     .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
-    .grid { position:absolute; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -19,10 +20,11 @@
 
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
   <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
-  <button onclick="toggleGrid()">Toggle Grid</button>
+  <button onclick="toggleGrid()">🗼 Toggle Grid</button>
 
-  <div style="position:relative; display:inline-block;">
+  <div class="container">
     <img id="uploadedImage" style="display:none;" onclick="pickColor(event)">
+    <div id="gridOverlay" class="grid-overlay"></div>
   </div>
 
   <div class="info">
@@ -42,18 +44,22 @@
   <script>
     let pickedColors = [];
     let gridEnabled = false;
-
-    const paletteColors = [ /* same as before, expanded */ 
-      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
-      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
-      {name:"Green", hex:"#00FF00"}, {name:"Lime", hex:"#32CD32"},
-      {name:"Blue", hex:"#0000FF"}, {name:"Ultramarine", hex:"#3F00FF"},
-      {name:"Purple", hex:"#800080"}, {name:"Pink", hex:"#FF69B4"},
-      {name:"Brown", hex:"#8B4513"}, {name:"Black", hex:"#000000"},
-      {name:"White", hex:"#FFFFFF"}, {name:"Gray", hex:"#808080"}
-    ];
+    const gridOverlay = document.getElementById('gridOverlay');
+    const img = document.getElementById('uploadedImage');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
 
     // Palette
+    const paletteColors = [
+      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
+      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
+      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
+      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
+      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
+      {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
+      {name:"Gray", hex:"#808080"}
+    ];
+
     const paletteDiv = document.getElementById('palette');
     paletteColors.forEach(c => {
       const sw = document.createElement('div');
@@ -86,11 +92,9 @@
       g = Math.floor(g / pickedColors.length);
       b = Math.floor(b / pickedColors.length);
       const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
-      const name = getColorName(r,g,b);
-
       document.getElementById('mixedResult').innerHTML = `
         <div class="color-swatch" style="background:${hex}; width:110px; height:110px"></div>
-        <strong>Mixed: ${hex} (${name})</strong>
+        <strong>Mixed: ${hex}</strong>
       `;
     }
 
@@ -101,14 +105,8 @@
 
     function toggleGrid() {
       gridEnabled = !gridEnabled;
-      alert(gridEnabled ? "Grid enabled (refresh image to see)" : "Grid disabled");
-      // Simple grid can be added with CSS background if needed
+      gridOverlay.style.display = gridEnabled ? 'block' : 'none';
     }
-
-    // Image picking (same improved)
-    const img = document.getElementById('uploadedImage');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
 
     document.getElementById('fileInput').addEventListener('change', e => {
       const file = e.target.files[0];
@@ -149,7 +147,6 @@
       if (r > 200 && g > 100 && b < 80) return "Orange";
       if (r < 60 && g < 60 && b < 60) return "Black";
       if (r > 220 && g > 220 && b > 220) return "White";
-      if (Math.abs(r-g) < 40 && Math.abs(g-b) < 40 && r > 60 && r < 200) return "Gray";
       return "Custom Color";
     }
   </script>
