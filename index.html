@@ -8,7 +8,7 @@
     body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; }
     .container { position:relative; display:inline-block; max-width:600px; }
     img { width:100%; border:2px solid #fff; border-radius:12px; }
-    .grid-overlay { position:absolute; top:0; left:0; width:100%; height:100%; background: repeating-linear-gradient(transparent, transparent 19%, rgba(255,255,255,0.25) 20%, rgba(255,255,255,0.25) 20.5%); pointer-events:none; border:1px solid rgba(255,255,255,0.5); box-sizing:border-box; display:none; }
+    .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
     .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
     button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
     .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
@@ -20,11 +20,18 @@
 
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
   <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
+
+  <div>
+    <label>Vertical: <span id="vValue">10</span></label>
+    <input type="range" id="vSlider" min="4" max="20" value="10" oninput="updateGrid()">
+    <label>Horizontal: <span id="hValue">10</span></label>
+    <input type="range" id="hSlider" min="4" max="20" value="10" oninput="updateGrid()">
+  </div>
   <button onclick="toggleGrid()">🗼 Toggle Grid</button>
 
   <div class="container">
     <img id="uploadedImage" style="display:none;" onclick="pickColor(event)">
-    <div id="gridOverlay" class="grid-overlay"></div>
+    <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
   </div>
 
   <div class="info">
@@ -44,8 +51,12 @@
   <script>
     let pickedColors = [];
     let gridEnabled = false;
-    const gridOverlay = document.getElementById('gridOverlay');
+    let vLines = 10;
+    let hLines = 10;
+
     const img = document.getElementById('uploadedImage');
+    const gridCanvas = document.getElementById('gridCanvas');
+    const ctxGrid = gridCanvas.getContext('2d');
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
@@ -103,16 +114,59 @@
       updateMix();
     }
 
+    function updateGrid() {
+      vLines = parseInt(document.getElementById('vSlider').value);
+      hLines = parseInt(document.getElementById('hSlider').value);
+      document.getElementById('vValue').textContent = vLines;
+      document.getElementById('hValue').textContent = hLines;
+      if (gridEnabled && img.src) drawGrid();
+    }
+
     function toggleGrid() {
       gridEnabled = !gridEnabled;
-      gridOverlay.style.display = gridEnabled ? 'block' : 'none';
+      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
+      if (gridEnabled && img.src) drawGrid();
+    }
+
+    function drawGrid() {
+      gridCanvas.width = img.width;
+      gridCanvas.height = img.height;
+      ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+      ctxGrid.strokeStyle = '#000000';
+      ctxGrid.lineWidth = 1.5;
+      ctxGrid.font = 'bold 12px Arial';
+      ctxGrid.fillStyle = '#000000';
+
+      // Vertical lines + numbers
+      for (let i = 1; i < vLines; i++) {
+        const x = (img.width / vLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(x, 0);
+        ctxGrid.lineTo(x, img.height);
+        ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), x - 8, 18);
+      }
+
+      // Horizontal lines + numbers
+      for (let i = 1; i < hLines; i++) {
+        const y = (img.height / hLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(0, y);
+        ctxGrid.lineTo(img.width, y);
+        ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), 8, y + 5);
+      }
     }
 
     document.getElementById('fileInput').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = ev => { img.src = ev.target.result; img.style.display = 'block'; };
+        reader.onload = ev => {
+          img.src = ev.target.result;
+          img.style.display = 'block';
+          img.onload = () => { if (gridEnabled) drawGrid(); };
+        };
         reader.readAsDataURL(file);
       }
     });
