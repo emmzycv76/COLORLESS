@@ -142,8 +142,6 @@
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = '#000000';
       ctxGrid.lineWidth = 1;
-      ctxGrid.font = '12px Arial';
-      ctxGrid.fillStyle = '#000000';
 
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
@@ -227,7 +225,7 @@
     function sendFeedback() {
       const text = document.getElementById('feedbackText').value.trim();
       if (text) {
-        alert("Thank you! Feedback received: \"" + text + "\"");
+        alert("Thank you! Feedback received.");
         document.getElementById('feedbackText').value = '';
       } else {
         alert("Please write something.");
