@@ -28,7 +28,7 @@
     <label>Horizontal: <span id="hValue">10</span></label>
     <input type="range" id="hSlider" min="4" max="20" value="10" oninput="updateGrid()">
     <button onclick="toggleGrid()">🗼 Toggle Grid</button>
-    <button onclick="downloadImage()">⬇️ Download with Grid</button>
+    <button id="downloadBtn" onclick="downloadImage()" style="display:none;">⬇️ Download with Grid</button>
   </div>
 
   <div class="container">
@@ -53,7 +53,7 @@
   <div class="feedback">
     <h3>💬 Send Feedback</h3>
     <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
-    <button onclick="sendFeedback()">Send</button>
+    <button onclick="sendFeedback()">Send Feedback</button>
   </div>
 
   <script>
@@ -133,12 +133,13 @@
     function toggleGrid() {
       gridEnabled = !gridEnabled;
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
+      document.getElementById('downloadBtn').style.display = gridEnabled ? 'inline-block' : 'none';
       if (gridEnabled) drawGrid();
     }
 
     function drawGrid() {
-      gridCanvas.width = img.clientWidth;
-      gridCanvas.height = img.clientHeight;
+      gridCanvas.width = img.width;
+      gridCanvas.height = img.height;
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = '#000000';
       ctxGrid.lineWidth = 1.2;
@@ -165,14 +166,14 @@
     }
 
     function downloadImage() {
-      const link = document.createElement('a');
-      link.download = 'colorless-with-grid.png';
       const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = img.width;
-      tempCanvas.height = img.height;
+      tempCanvas.width = img.naturalWidth || img.width;
+      tempCanvas.height = img.naturalHeight || img.height;
       const tempCtx = tempCanvas.getContext('2d');
       tempCtx.drawImage(img, 0, 0);
       tempCtx.drawImage(gridCanvas, 0, 0);
+      const link = document.createElement('a');
+      link.download = 'colorless-with-grid.png';
       link.href = tempCanvas.toDataURL('image/png');
       link.click();
     }
@@ -227,10 +228,10 @@
     function sendFeedback() {
       const text = document.getElementById('feedbackText').value.trim();
       if (text) {
-        alert("Thank you! Your feedback has been received.");
+        alert("Thank you for your feedback! We received: \"" + text + "\"");
         document.getElementById('feedbackText').value = '';
       } else {
-        alert("Please write something before sending.");
+        alert("Please write your feedback before sending.");
       }
     }
   </script>
