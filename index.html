@@ -68,7 +68,6 @@
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
 
-    // Palette
     const paletteColors = [
       {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
       {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
@@ -142,7 +141,7 @@
       gridCanvas.height = img.height;
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = '#000000';
-      ctxGrid.lineWidth = 1.2;
+      ctxGrid.lineWidth = 1;
       ctxGrid.font = '12px Arial';
       ctxGrid.fillStyle = '#000000';
 
@@ -228,10 +227,10 @@
     function sendFeedback() {
       const text = document.getElementById('feedbackText').value.trim();
       if (text) {
-        alert("Thank you for your feedback! We received: \"" + text + "\"");
+        alert("Thank you! Feedback received: \"" + text + "\"");
         document.getElementById('feedbackText').value = '';
       } else {
-        alert("Please write your feedback before sending.");
+        alert("Please write something.");
       }
     }
   </script>
