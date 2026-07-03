@@ -238,8 +238,14 @@
     function sendFeedback() {
       const text = document.getElementById('feedbackText').value.trim();
       if (text) {
-        alert("Feedback sent to mauricemonroe509@gmail.com");
-        document.getElementById('feedbackText').value = '';
+        fetch('https://formspree.io/f/xjgqpqav', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ feedback: text })
+        }).then(() => {
+          alert("Feedback sent to mauricemonroe509@gmail.com");
+          document.getElementById('feedbackText').value = '';
+        });
       } else {
         alert("Please write something.");
       }
