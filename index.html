@@ -1,216 +1,216 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Colorless</title>
-  <style>
-    body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; transition:0.3s; }
-    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; }
-    .menu { position:fixed; top:0; left:-300px; width:300px; height:100%; background:#1a1a1a; transition:0.3s; padding:20px; z-index:100; }
-    .menu.open { left:0; }
-    .container { position:relative; display:inline-block; max-width:600px; }
-    img { width:100%; border:2px solid #fff; border-radius:12px; }
-    .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    .controls { display:none; margin:10px 0; }
-    .info, .mixer, .feedback { padding:15px; background:#222; margin:10px; border-radius:12px; }
-    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
-    .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
-    .logo { width:60px; height:60px; }
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colorless</title>
+  <style>
+    body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; transition:0.3s; }
+    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; }
+    .menu { position:fixed; top:0; left:-300px; width:300px; height:100%; background:#1a1a1a; transition:0.3s; padding:20px; z-index:100; }
+    .menu.open { left:0; }
+    .container { position:relative; display:inline-block; max-width:600px; }
+    img { width:100%; border:2px solid #fff; border-radius:12px; }
+    .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .controls { display:none; margin:10px 0; }
+    .info, .mixer, .feedback { padding:15px; background:#222; margin:10px; border-radius:12px; }
+    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
+    .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
+    .logo { width:60px; height:60px; }
+  </style>
 </head>
 <body>
-  <div class="header">
-    <button onclick="toggleMenu()">☰</button>
-    <h1><img src="https://your-logo-link-here" class="logo" alt="Colorless"> Colorless</h1>
-    <div></div>
-  </div>
+  <div class="header">
+    <button onclick="toggleMenu()">☰</button>
+    <h1><img src="https://your-logo-link-here" class="logo" alt="Colorless"> Colorless</h1>
+    <div></div>
+  </div>
 
-  <div id="sideMenu" class="menu">
-    <h2>Menu</h2>
-    <button onclick="toggleDarkMode()">🌙 Dark / Light Mode</button>
-    <button onclick="closeMenu()">Close</button>
-  </div>
+  <div id="sideMenu" class="menu">
+    <h2>Menu</h2>
+    <button onclick="toggleDarkMode()">🌙 Dark / Light Mode</button>
+    <button onclick="closeMenu()">Close</button>
+  </div>
 
-  <input type="file" id="fileInput" accept="image/*" style="display:none;">
-  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
+  <input type="file" id="fileInput" accept="image/*" style="display:none;">
+  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
 
-  <div id="imageControls" class="controls">
-    <label>Vertical: <span id="vValue">10</span></label>
-    <input type="range" id="vSlider" min="4" max="20" value="10" oninput="updateGrid()">
-    <label>Horizontal: <span id="hValue">10</span></label>
-    <input type="range" id="hSlider" min="4" max="20" value="10" oninput="updateGrid()">
-    <button onclick="toggleGrid()">🗼 Toggle Grid</button>
-    <button id="downloadBtn" onclick="downloadImage()" style="display:none;">⬇️ Download with Grid</button>
-  </div>
+  <div id="imageControls" class="controls">
+    <label>Vertical: <span id="vValue">10</span></label>
+    <input type="range" id="vSlider" min="4" max="20" value="10" oninput="updateGrid()">
+    <label>Horizontal: <span id="hValue">10</span></label>
+    <input type="range" id="hSlider" min="4" max="20" value="10" oninput="updateGrid()">
+    <button onclick="toggleGrid()">🗼 Toggle Grid</button>
+    <button id="downloadBtn" onclick="downloadImage()" style="display:none;">⬇️ Download with Grid</button>
+  </div>
 
-  <div class="container">
-    <img id="uploadedImage" style="display:none;" onclick="pickColor(event)">
-    <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
-  </div>
+  <div class="container">
+    <img id="uploadedImage" style="display:none;" onclick="pickColor(event)">
+    <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
+  </div>
 
-  <div class="info">
-    <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
-    <h2 id="hex">#------</h2>
-    <p id="rgb">RGB: ---</p>
-    <p id="name">Color: ---</p>
-  </div>
+  <div class="info">
+    <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
+    <h2 id="hex">#------</h2>
+    <p id="rgb">RGB: ---</p>
+    <p id="name">Color: ---</p>
+  </div>
 
-  <div class="mixer">
-    <h3>🎨 Color Mixer</h3>
-    <div id="palette"></div>
-    <div id="mixedResult" style="margin:20px 0; min-height:130px;"></div>
-    <button onclick="clearMix()">Clear Mixer</button>
-  </div>
+  <div class="mixer">
+    <h3>🎨 Color Mixer</h3>
+    <div id="palette"></div>
+    <div id="mixedResult" style="margin:20px 0; min-height:130px;"></div>
+    <button onclick="clearMix()">Clear Mixer</button>
+  </div>
 
-  <div class="feedback">
-    <h3>💬 Send Feedback</h3>
-    <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
-    <button onclick="sendFeedback()">Send Feedback</button>
-  </div>
+  <div class="feedback">
+    <h3>💬 Send Feedback</h3>
+    <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
+    <button onclick="sendFeedback()">Send Feedback</button>
+  </div>
 
-  <script>
-    let pickedColors = [];
-    let gridEnabled = false;
-    let vLines = 10;
-    let hLines = 10;
+  <script>
+    let pickedColors = [];
+    let gridEnabled = false;
+    let vLines = 10;
+    let hLines = 10;
 
-    const img = document.getElementById('uploadedImage');
-    const gridCanvas = document.getElementById('gridCanvas');
-    const ctxGrid = gridCanvas.getContext('2d');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const img = document.getElementById('uploadedImage');
+    const gridCanvas = document.getElementById('gridCanvas');
+    const ctxGrid = gridCanvas.getContext('2d');
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
 
-    const paletteColors = [
-      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
-      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
-      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
-      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
-      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
+    const paletteColors = [
+      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
+      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
+      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
+      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
+      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
       {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
-      {name:"Gray", hex:"#808080"}
-    ];
+      {name:"Gray", hex:"#808080"}
+    ];
 
-    const paletteDiv = document.getElementById('palette');
-    paletteColors.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'color-swatch';
-      sw.style.background = c.hex;
-      sw.title = c.name;
-      sw.onclick = () => addToMix(c);
-      paletteDiv.appendChild(sw);
-    });
+    const paletteDiv = document.getElementById('palette');
+    paletteColors.forEach(c => {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch';
+      sw.style.background = c.hex;
+      sw.title = c.name;
+      sw.onclick = () => addToMix(c);
+      paletteDiv.appendChild(sw);
+    });
 
-    function addToMix(c) {
-      pickedColors.push(c);
-      if (pickedColors.length > 8) pickedColors.shift();
-      updateMix();
-    }
+    function addToMix(c) {
+      pickedColors.push(c);
+      if (pickedColors.length > 8) pickedColors.shift();
+      updateMix();
+    }
 
-    function updateMix() {
-      if (pickedColors.length === 0) {
-        document.getElementById('mixedResult').innerHTML = '<p>Tap swatches to mix</p>';
-        return;
-      }
-      let r=0, g=0, b=0;
-      pickedColors.forEach(c => {
-        const h = c.hex.replace('#','');
-        r += parseInt(h.substr(0,2),16);
-        g += parseInt(h.substr(2,2),16);
-        b += parseInt(h.substr(4,2),16);
-      });
-      r = Math.floor(r / pickedColors.length);
-      g = Math.floor(g / pickedColors.length);
-      b = Math.floor(b / pickedColors.length);
-      const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
-      document.getElementById('mixedResult').innerHTML = `
-        <div class="color-swatch" style="background:${hex}; width:110px; height:110px"></div>
-        <strong>Mixed: ${hex}</strong>
-      `;
-    }
+    function updateMix() {
+      if (pickedColors.length === 0) {
+        document.getElementById('mixedResult').innerHTML = '<p>Tap swatches to mix</p>';
+        return;
+      }
+      let r=0, g=0, b=0;
+      pickedColors.forEach(c => {
+        const h = c.hex.replace('#','');
+        r += parseInt(h.substr(0,2),16);
+        g += parseInt(h.substr(2,2),16);
+        b += parseInt(h.substr(4,2),16);
+      });
+      r = Math.floor(r / pickedColors.length);
+      g = Math.floor(g / pickedColors.length);
+      b = Math.floor(b / pickedColors.length);
+      const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
+      document.getElementById('mixedResult').innerHTML = `
+        <div class="color-swatch" style="background:${hex}; width:110px; height:110px"></div>
+        <strong>Mixed: ${hex}</strong>
+      `;
+    }
 
-    function clearMix() {
-      pickedColors = [];
-      updateMix();
-    }
+    function clearMix() {
+      pickedColors = [];
+      updateMix();
+    }
 
-    function updateGrid() {
-      vLines = parseInt(document.getElementById('vSlider').value);
-      hLines = parseInt(document.getElementById('hSlider').value);
-      document.getElementById('vValue').textContent = vLines;
-      document.getElementById('hValue').textContent = hLines;
-      if (gridEnabled) drawGrid();
-    }
+    function updateGrid() {
+      vLines = parseInt(document.getElementById('vSlider').value);
+      hLines = parseInt(document.getElementById('hSlider').value);
+      document.getElementById('vValue').textContent = vLines;
+      document.getElementById('hValue').textContent = hLines;
+      if (gridEnabled) drawGrid();
+    }
 
-    function toggleGrid() {
-      gridEnabled = !gridEnabled;
-      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
-      document.getElementById('downloadBtn').style.display = gridEnabled ? 'inline-block' : 'none';
-      if (gridEnabled) drawGrid();
-    }
+    function toggleGrid() {
+      gridEnabled = !gridEnabled;
+      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
+      document.getElementById('downloadBtn').style.display = gridEnabled ? 'inline-block' : 'none';
+      if (gridEnabled) drawGrid();
+    }
 
-    function drawGrid() {
-      gridCanvas.width = img.width;
-      gridCanvas.height = img.height;
-      ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-      ctxGrid.strokeStyle = '#000000';
-      ctxGrid.lineWidth = 1;
+    function drawGrid() {
+      gridCanvas.width = img.width;
+      gridCanvas.height = img.height;
+      ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+      ctxGrid.strokeStyle = '#000000';
+      ctxGrid.lineWidth = 1;
 
-      for (let i = 1; i < vLines; i++) {
-        const x = (gridCanvas.width / vLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(x, 0);
-        ctxGrid.lineTo(x, gridCanvas.height);
-        ctxGrid.stroke();
-        ctxGrid.fillText(i, x - 8, 16);
-      }
+      for (let i = 1; i < vLines; i++) {
+        const x = (gridCanvas.width / vLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(x, 0);
+        ctxGrid.lineTo(x, gridCanvas.height);
+        ctxGrid.stroke();
+        ctxGrid.fillText(i, x - 8, 16);
+      }
 
-      for (let i = 1; i < hLines; i++) {
-        const y = (gridCanvas.height / hLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(0, y);
-        ctxGrid.lineTo(gridCanvas.width, y);
-        ctxGrid.stroke();
-        ctxGrid.fillText(i, 8, y + 5);
-      }
-    }
+      for (let i = 1; i < hLines; i++) {
+        const y = (gridCanvas.height / hLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(0, y);
+        ctxGrid.lineTo(gridCanvas.width, y);
+        ctxGrid.stroke();
+        ctxGrid.fillText(i, 8, y + 5);
+      }
+    }
 
-    function downloadImage() {
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = img.naturalWidth || img.width;
-      tempCanvas.height = img.naturalHeight || img.height;
-      const tempCtx = tempCanvas.getContext('2d');
-      tempCtx.drawImage(img, 0, 0);
-      tempCtx.drawImage(gridCanvas, 0, 0);
-      const link = document.createElement('a');
-      link.download = 'colorless-with-grid.png';
-      link.href = tempCanvas.toDataURL('image/png');
-      link.click();
-    }
+    function downloadImage() {
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = img.naturalWidth || img.width;
+      tempCanvas.height = img.naturalHeight || img.height;
+      const tempCtx = tempCanvas.getContext('2d');
+      tempCtx.drawImage(img, 0, 0);
+      tempCtx.drawImage(gridCanvas, 0, 0);
+      const link = document.createElement('a');
+      link.download = 'colorless-with-grid.png';
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+    }
 
-    document.getElementById('fileInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          img.src = ev.target.result;
-          img.style.display = 'block';
-          document.getElementById('imageControls').style.display = 'block';
-          img.onload = () => { if (gridEnabled) drawGrid(); };
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    document.getElementById('fileInput').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          img.src = ev.target.result;
+          img.style.display = 'block';
+          document.getElementById('imageControls').style.display = 'block';
+          img.onload = () => { if (gridEnabled) drawGrid(); };
+        };
+        reader.readAsDataURL(file);
+      }
+    });
 
-    img.onclick = pickColor;
+    img.onclick = pickColor;
 
-    function pickColor(e) {
-      canvas.width = img.width;
-      canvas.height = img.height;
-      ctx.drawImage(img, 0, 0);
+    function pickColor(e) {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
 
-      const rect = img.getBoundingClientRect();
-const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
+      const rect = img.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
       const y = Math.floor((e.clientY - rect.top) * (img.height / rect.height));
 
       const pixel = ctx.getImageData(x, y, 1, 1).data;
@@ -219,8 +219,8 @@ const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
 
       document.getElementById('colorBox').style.backgroundColor = hex;
       document.getElementById('hex').textContent = hex;
-      document.getElementById('rgb').textContent = RGB: ${r}, ${g}, ${b};
-      document.getElementById('name').textContent = Color: ${getColorName(r, g, b)};
+      document.getElementById('rgb').textContent = `RGB: ${r}, ${g}, ${b}`;
+      document.getElementById('name').textContent = `Color: ${getColorName(r, g, b)}`;
     }
 
     function getColorName(r, g, b) {
