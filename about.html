@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - Colorless</title>
+  <style>
+    body { margin:0; font-family: Arial; background: #111; color: white; padding:15px; line-height:1.6; }
+    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; cursor:pointer; }
+    .logo { width: 45px; height: 45px; margin-right: 10px; }
+    .header h1 { display: flex; align-items: center; margin: 0; }
+    .menu { position:fixed; top:0; left:-300px; width:280px; height:100%; background:#1a1a1a; transition:0.3s; padding:20px; z-index:104; box-shadow:2px 0 10px rgba(0,0,0,0.5); }
+    .menu.open { left:0; }
+  </style>
+</head>
+<body>
+  <div class="header" onclick="toggleMenu()">
+    <h1>
+      <img src="https://github.com/emmzycv76/COLORLESS/raw/refs/heads/main/IMG_5615.jpeg" class="logo" alt="Logo">
+      Colorless
+    </h1>
+  </div>
+
+  <div id="sideMenu" class="menu">
+    <h2>Menu</h2>
+    <button onclick="goToPage('index.html')">🏠 Home</button>
+    <button onclick="goToPage('editor.html')">✏️ Editor</button>
+    <button onclick="goToPage('about.html')">ℹ️ About</button>
+    <button onclick="goToPage('faq.html')">❓ FAQ</button>
+    <button onclick="goToPage('terms.html')">📜 Terms</button>
+    <button onclick="closeMenu()">Close</button>
+  </div>
+
+  <h2>About Colorless</h2>
+  <p>Colorless is a free tool designed for artists, illustrators, and creatives who want to analyze colors from reference photos and use a precise grid for transferring artwork to traditional media.</p>
+  <p>Everything runs locally in your browser — no images are uploaded or stored.</p>
+
+  <button onclick="goToPage('index.html')">← Back to Home</button>
+
+  <script>
+    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
+    function closeMenu() { document.getElementById('sideMenu').classList.remove('open'); }
+    function goToPage(page) {
+      closeMenu();
+      window.location.href = page;
+    }
+  </script>
+</body>
+</html>
