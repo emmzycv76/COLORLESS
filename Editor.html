@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Colorless - Editor</title>
+  <style>
+    body { margin:0; font-family: Arial; background: #111; color: white; }
+    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; position:sticky; top:0; z-index:100; }
+    .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; display:block; }
+    img { width:100%; border:2px solid #fff; border-radius:12px; cursor: crosshair; }
+    .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .controls { padding:15px; background:#1a1a1a; margin:10px; border-radius:12px; }
+    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
+    button:hover { background:#ff6666; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button onclick="backToHome()">← Back</button>
+    <h2>Editor</h2>
+    <button onclick="downloadImage()">⬇️ Download</button>
+  </div>
+
+  <div class="container">
+    <img id="editorImage" onclick="pickColor(event)">
+    <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
+  </div>
+
+  <div class="controls">
+    <label>Vertical Lines: <span id="vValue">20</span></label>
+    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    
+    <label>Horizontal Lines: <span id="hValue">20</span></label>
+    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    
+    <button onclick="toggleGrid()">🗼 Toggle Grid</button>
+  </div>
+
+  <script>
+    let gridEnabled = false;
+    let vLines = 20;
+    let hLines = 20;
+
+    const img = document.getElementById('editorImage');
+    const gridCanvas = document.getElementById('gridCanvas');
+    const ctxGrid = gridCanvas.getContext('2d');
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Load image from main page
+    function loadImage() {
+      const saved = localStorage.getItem('colorlessImage');
+      if (saved) {
+        img.src = saved;
+      } else {
+        alert("No image found. Please upload from the home page.");
+        backToHome();
+      }
+    }
+
+    img.onload = () => {
+      if (gridEnabled) drawGrid();
+    };
+
+    function pickColor(e) {
+      tempCanvas.width = img.width;
+      tempCanvas.height = img.height;
+      tempCtx.drawImage(img, 0, 0);
+
+      const rect = img.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
+      const y = Math.floor((e.clientY - rect.top) * (img.height / rect.height));
+
+      const pixel = tempCtx.getImageData(x, y, 1, 1).data;
+      const r = pixel[0], g = pixel[1], b = pixel[2];
+      const hex = '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('').toUpperCase();
+
+      alert(`🎨 Color Picked!\nHex: ${hex}\nRGB: ${r}, ${g}, ${b}`);
+    }
+
+    function updateGrid() {
+      vLines = parseInt(document.getElementById('vSlider').value);
+      hLines = parseInt(document.getElementById('hSlider').value);
+      document.getElementById('vValue').textContent = vLines;
+      document.getElementById('hValue').textContent = hLines;
+      if (gridEnabled) drawGrid();
+    }
+
+    function toggleGrid() {
+      gridEnabled = !gridEnabled;
+      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
+      if (gridEnabled) drawGrid();
+    }
+
+    function drawGrid() {
+      gridCanvas.width = img.width;
+      gridCanvas.height = img.height;
+      ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
+      ctxGrid.strokeStyle = '#000000';
+      ctxGrid.lineWidth = 1;
+
+      for (let i = 1; i < vLines; i++) {
+        const x = (gridCanvas.width / vLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(x, 0);
+        ctxGrid.lineTo(x, gridCanvas.height);
+        ctxGrid.stroke();
+      }
+
+      for (let i = 1; i < hLines; i++) {
+        const y = (gridCanvas.height / hLines) * i;
+        ctxGrid.beginPath();
+        ctxGrid.moveTo(0, y);
+        ctxGrid.lineTo(gridCanvas.width, y);
+        ctxGrid.stroke();
+      }
+    }
+
+    function downloadImage() {
+      tempCanvas.width = img.naturalWidth || img.width;
+      tempCanvas.height = img.naturalHeight || img.height;
+      tempCtx.drawImage(img, 0, 0);
+      if (gridEnabled) tempCtx.drawImage(gridCanvas, 0, 0);
+
+      const link = document.createElement('a');
+      link.download = 'colorless-with-grid.png';
+      link.href = tempCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function backToHome() {
+      localStorage.removeItem('colorlessImage'); // Optional cleanup
+      window.location.href = 'index.html';
+    }
+
+    // Initialize
+    loadImage();
+  </script>
+</body>
+</html>
