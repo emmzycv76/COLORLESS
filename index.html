@@ -5,339 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Colorless</title>
   <style>
-    body { 
-      margin:0; font-family: Arial; background: #111; color: white; 
-      text-align:center; padding:10px; transition:0.3s; 
-    }
-    .header { 
-      display:flex; justify-content:space-between; align-items:center; 
-      padding:10px; background:#1a1a1a; position:sticky; top:0; z-index:103; 
-    }
-    .menu { 
-      position:fixed; top:0; left:-300px; width:280px; height:100%; 
-      background:#1a1a1a; transition:0.3s; padding:20px; z-index:104; 
-      box-shadow:2px 0 10px rgba(0,0,0,0.5); 
-    }
-    .menu.open { left:0; }
-    .container { 
-      position:relative; display:inline-block; max-width:600px; margin-top:20px; 
-    }
-    img { width:100%; border:2px solid #fff; border-radius:12px; cursor: crosshair; }
-    .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    
-    .view { display: none; }
-    .view.active { display: block; }
-
-    .controls, .info, .mixer, .feedback { 
-      padding:15px; background:#222; margin:10px; border-radius:12px; 
-    }
-    button { 
-      padding:12px 20px; margin:8px; font-size:16px; border:none; 
-      border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; 
-    }
-    button:hover { background:#ff6666; }
-    .color-swatch { 
-      width:55px; height:55px; margin:6px; border:3px solid white; 
-      border-radius:12px; display:inline-block; cursor:pointer; 
-    }
-    .logo { width:60px; height:60px; }
+    body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; }
+    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; }
+    .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; }
+    img { width:100%; border:2px solid #fff; border-radius:12px; }
+    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
+    .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
+    .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
   </style>
 </head>
 <body>
-
-  <!-- HEADER -->
   <div class="header">
-    <button onclick="toggleMenu()">☰</button>
-    <h1><img src="https://your-logo-link-here" class="logo" alt="Colorless"> Colorless</h1>
-    <button onclick="toggleDarkMode()">🌙</button>
+    <h1>Colorless</h1>
   </div>
 
-  <!-- SIDE MENU -->
-  <div id="sideMenu" class="menu">
-    <h2>Menu</h2>
-    <button onclick="switchView('home')">🏠 Home</button>
-    <button onclick="switchView('editor')">✏️ Editor</button>
-    <button onclick="closeMenu()">Close</button>
+  <input type="file" id="fileInput" accept="image/*" style="display:none;">
+  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
+
+  <div class="container">
+    <img id="mainImage" style="display:none;">
   </div>
 
-  <!-- HOME VIEW -->
-  <div id="home-view" class="view active">
-    <input type="file" id="fileInput" accept="image/*" style="display:none;">
-    <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
-
-    <div id="imageControls" class="controls" style="display:none;">
-      <label>Vertical Lines: <span id="vValue">20</span></label>
-      <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
-      <label>Horizontal Lines: <span id="hValue">20</span></label>
-      <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
-      <button onclick="toggleGrid()">🗼 Toggle Grid</button>
-      <button onclick="switchToEditor()">✏️ Open in Editor</button>
-    </div>
-
-    <div class="container">
-      <img id="mainImage" style="display:none;" onclick="pickColor(event)">
-      <canvas id="mainGrid" class="grid-canvas" style="display:none;"></canvas>
-    </div>
-
-    <div class="info">
-      <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
-      <h2 id="hex">#------</h2>
-      <p id="rgb">RGB: ---</p>
-      <p id="name">Color: ---</p>
-    </div>
-
-    <div class="mixer">
-      <h3>🎨 Color Mixer</h3>
-      <div id="palette"></div>
-      <div id="mixedResult" style="margin:20px 0; min-height:130px;"></div>
-      <button onclick="clearMix()">Clear Mixer</button>
-    </div>
+  <div class="info">
+    <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
+    <h2 id="hex">#------</h2>
+    <p id="rgb">RGB: ---</p>
+    <p id="name">Color: ---</p>
   </div>
 
-  <!-- EDITOR VIEW -->
-  <div id="editor-view" class="view">
-    <div class="container">
-      <img id="editorImage" onclick="pickColorEditor(event)">
-      <canvas id="editorGrid" class="grid-canvas" style="display:none;"></canvas>
-    </div>
-
-    <div class="info">
-      <div id="editorColorBox" class="color-swatch" style="width:90px;height:90px"></div>
-      <h2 id="editorHex">#------</h2>
-      <p id="editorRgb">RGB: ---</p>
-      <p id="editorName">Color: ---</p>
-    </div>
-
-    <div style="margin:15px;">
-      <button onclick="toggleEditorGrid()">🗼 Grid</button>
-      <button onclick="downloadEditorImage()">⬇️ Download</button>
-      <button onclick="switchView('home')">← Back to Home</button>
-    </div>
-  </div>
-
-  <!-- FEEDBACK -->
-  <div class="feedback">
-    <h3>💬 Send Feedback</h3>
-    <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
-    <button onclick="sendFeedback()">Send Feedback</button>
+  <div class="mixer">
+    <h3>🎨 Color Mixer</h3>
+    <div id="palette"></div>
   </div>
 
   <script>
-    // Shared variables
     let currentImageData = null;
-    let pickedColors = [];
-    let gridEnabled = false;
-    let vLines = 20, hLines = 20;
 
-    const mainImg = document.getElementById('mainImage');
-    const editorImg = document.getElementById('editorImage');
-    const mainGrid = document.getElementById('mainGrid');
-    const editorGrid = document.getElementById('editorGrid');
-    const ctxMain = mainGrid.getContext('2d');
-    const ctxEditor = editorGrid.getContext('2d');
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-
-    // Palette
-    const paletteColors = [
-      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
-      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
-      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
-      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
-      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
-      {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
-      {name:"Gray", hex:"#808080"}
-    ];
-
-    paletteColors.forEach(c => {
+    const paletteColors = ["#FF0000","#FFFF00","#00FF00","#0000FF","#FF00FF","#FFA500"];
+    const paletteDiv = document.getElementById('palette');
+    paletteColors.forEach(hex => {
       const sw = document.createElement('div');
       sw.className = 'color-swatch';
-      sw.style.background = c.hex;
-      sw.title = c.name;
-      sw.onclick = () => addToMix(c);
-      document.getElementById('palette').appendChild(sw);
+      sw.style.background = hex;
+      paletteDiv.appendChild(sw);
     });
 
-    function addToMix(c) {
-      pickedColors.push(c);
-      if (pickedColors.length > 8) pickedColors.shift();
-      updateMix();
-    }
-
-    function updateMix() {
-      const result = document.getElementById('mixedResult');
-      if (pickedColors.length === 0) {
-        result.innerHTML = '<p>Tap swatches to mix</p>';
-        return;
-      }
-      let r=0, g=0, b=0;
-      pickedColors.forEach(c => {
-        const h = c.hex.replace('#','');
-        r += parseInt(h.substr(0,2),16);
-        g += parseInt(h.substr(2,2),16);
-        b += parseInt(h.substr(4,2),16);
-      });
-      r = Math.floor(r / pickedColors.length);
-      g = Math.floor(g / pickedColors.length);
-      b = Math.floor(b / pickedColors.length);
-      const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
-      result.innerHTML = `<div class="color-swatch" style="background:${hex}; width:110px; height:110px; margin:10px auto;"></div><strong>Mixed: ${hex}</strong>`;
-    }
-
-    function clearMix() {
-      pickedColors = [];
-      updateMix();
-    }
-
-    // Upload Handler
     document.getElementById('fileInput').addEventListener('change', e => {
       const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          currentImageData = ev.target.result;
-          mainImg.src = currentImageData;
-          mainImg.style.display = 'block';
-          document.getElementById('imageControls').style.display = 'block';
-          switchToEditor(); // Auto go to editor after upload
-        };
-        reader.readAsDataURL(file);
-      }
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = ev => {
+        currentImageData = ev.target.result;
+        document.getElementById('mainImage').src = currentImageData;
+        document.getElementById('mainImage').style.display = 'block';
+
+        // Save image and go to editor
+        localStorage.setItem('colorlessImage', currentImageData);
+        window.location.href = 'editor.html';
+      };
+      reader.readAsDataURL(file);
     });
-
-    function switchToEditor() {
-      if (!currentImageData) return alert("Please upload an image first");
-      editorImg.src = currentImageData;
-      switchView('editor');
-    }
-
-    function switchView(view) {
-      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-      document.getElementById(view + '-view').classList.add('active');
-    }
-
-    // Color Picker (Home)
-    function pickColor(e) {
-      pickColorFromImage(e, mainImg, 'colorBox', 'hex', 'rgb', 'name');
-    }
-
-    // Color Picker (Editor)
-    function pickColorEditor(e) {
-      pickColorFromImage(e, editorImg, 'editorColorBox', 'editorHex', 'editorRgb', 'editorName');
-    }
-
-    function pickColorFromImage(e, imageElement, boxId, hexId, rgbId, nameId) {
-      tempCanvas.width = imageElement.width;
-      tempCanvas.height = imageElement.height;
-      tempCtx.drawImage(imageElement, 0, 0);
-
-      const rect = imageElement.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) * (imageElement.width / rect.width));
-      const y = Math.floor((e.clientY - rect.top) * (imageElement.height / rect.height));
-
-      const pixel = tempCtx.getImageData(x, y, 1, 1).data;
-      const r = pixel[0], g = pixel[1], b = pixel[2];
-      const hex = '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('').toUpperCase();
-
-      document.getElementById(boxId).style.backgroundColor = hex;
-      document.getElementById(hexId).textContent = hex;
-      document.getElementById(rgbId).textContent = `RGB: ${r}, ${g}, ${b}`;
-      document.getElementById(nameId).textContent = `Color: ${getColorName(r, g, b)}`;
-    }
-
-    function getColorName(r, g, b) {
-      if (r > 200 && g < 110 && b < 110) return "Red";
-      if (g > 180 && r < 120 && b < 120) return "Green";
-      if (b > 180 && r < 120 && g < 120) return "Blue";
-      if (r > 200 && g > 170 && b < 100) return "Yellow";
-      if (r > 160 && g < 100 && b > 140) return "Purple";
-      if (r > 200 && g > 100 && b < 80) return "Orange";
-      if (r < 60 && g < 60 && b < 60) return "Black";
-      if (r > 220 && g > 220 && b > 220) return "White";
-      return "Custom Color";
-    }
-
-    // Grid Functions
-    function updateGrid() {
-      vLines = parseInt(document.getElementById('vSlider').value);
-      hLines = parseInt(document.getElementById('hSlider').value);
-      document.getElementById('vValue').textContent = vLines;
-      document.getElementById('hValue').textContent = hLines;
-      if (gridEnabled) drawGrid(mainGrid, mainImg);
-    }
-
-    function toggleGrid() {
-      gridEnabled = !gridEnabled;
-      mainGrid.style.display = gridEnabled ? 'block' : 'none';
-      if (gridEnabled) drawGrid(mainGrid, mainImg);
-    }
-
-    function toggleEditorGrid() {
-      gridEnabled = !gridEnabled;
-      editorGrid.style.display = gridEnabled ? 'block' : 'none';
-      if (gridEnabled) drawGrid(editorGrid, editorImg);
-    }
-
-    function drawGrid(gridCanvas, image) {
-      gridCanvas.width = image.width;
-      gridCanvas.height = image.height;
-      const ctx = gridCanvas.getContext('2d');
-      ctx.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-      ctx.strokeStyle = '#000000';
-      ctx.lineWidth = 1;
-
-      for (let i = 1; i < vLines; i++) {
-        const x = (gridCanvas.width / vLines) * i;
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, gridCanvas.height);
-        ctx.stroke();
-      }
-      for (let i = 1; i < hLines; i++) {
-        const y = (gridCanvas.height / hLines) * i;
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(gridCanvas.width, y);
-        ctx.stroke();
-      }
-    }
-
-    function downloadEditorImage() {
-      tempCanvas.width = editorImg.naturalWidth || editorImg.width;
-      tempCanvas.height = editorImg.naturalHeight || editorImg.height;
-      tempCtx.drawImage(editorImg, 0, 0);
-      if (gridEnabled) tempCtx.drawImage(editorGrid, 0, 0);
-
-      const link = document.createElement('a');
-      link.download = 'colorless-edited.png';
-      link.href = tempCanvas.toDataURL('image/png');
-      link.click();
-    }
-
-    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
-    function closeMenu() { document.getElementById('sideMenu').classList.remove('open'); }
-
-    function toggleDarkMode() {
-      const body = document.body;
-      if (body.style.backgroundColor === 'rgb(240, 240, 240)') {
-        body.style.background = '#111';
-        body.style.color = 'white';
-      } else {
-        body.style.background = '#f0f0f0';
-        body.style.color = '#111';
-      }
-      closeMenu();
-    }
-
-    function sendFeedback() {
-      const text = document.getElementById('feedbackText').value.trim();
-      if (text) {
-        alert("Feedback received! (In real app this would be sent)");
-        document.getElementById('feedbackText').value = '';
-      } else {
-        alert("Please write something.");
-      }
-    }
   </script>
 </body>
 </html>
