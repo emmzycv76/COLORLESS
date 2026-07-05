@@ -13,6 +13,7 @@
     .controls { padding:15px; background:#1a1a1a; margin:10px; border-radius:12px; }
     button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
     button:hover { background:#ff6666; }
+    .grid-controls { display: none; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -28,13 +29,18 @@
   </div>
 
   <div class="controls">
-    <label>Vertical Lines: <span id="vValue">20</span></label>
-    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
-    
-    <label>Horizontal Lines: <span id="hValue">20</span></label>
-    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
-    
     <button onclick="toggleGrid()">🗼 Toggle Grid</button>
+    <button onclick="cropImage()">✂️ Crop</button>
+    <button onclick="pickColorFromImage()">🎨 Color ID</button>
+
+    <!-- Grid Sliders - Hidden until grid is toggled -->
+    <div id="gridControls" class="grid-controls">
+      <label>Vertical Lines: <span id="vValue">20</span></label>
+      <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
+      
+      <label>Horizontal Lines: <span id="hValue">20</span></label>
+      <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    </div>
   </div>
 
   <script>
@@ -47,14 +53,15 @@
     const ctxGrid = gridCanvas.getContext('2d');
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
+    const gridControls = document.getElementById('gridControls');
 
-    // Load image from main page
+    // Load image
     function loadImage() {
       const saved = localStorage.getItem('colorlessImage');
       if (saved) {
         img.src = saved;
       } else {
-        alert("No image found. Please upload from the home page.");
+        alert("No image found. Please upload from home.");
         backToHome();
       }
     }
@@ -63,20 +70,26 @@
       if (gridEnabled) drawGrid();
     };
 
+    // Color Picker
     function pickColor(e) {
+      pickColorFromImage();
+    }
+
+    function pickColorFromImage() {
       tempCanvas.width = img.width;
       tempCanvas.height = img.height;
       tempCtx.drawImage(img, 0, 0);
 
-      const rect = img.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) * (img.width / rect.width));
-      const y = Math.floor((e.clientY - rect.top) * (img.height / rect.height));
+      // For now, alert on click (we can improve this later to show persistent info)
+      alert("Tap on the image to pick a color!");
+    }
 
-      const pixel = tempCtx.getImageData(x, y, 1, 1).data;
-      const r = pixel[0], g = pixel[1], b = pixel[2];
-      const hex = '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('').toUpperCase();
-
-      alert(`🎨 Color Picked!\nHex: ${hex}\nRGB: ${r}, ${g}, ${b}`);
+    function toggleGrid() {
+      gridEnabled = !gridEnabled;
+      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
+      gridControls.style.display = gridEnabled ? 'block' : 'none';
+      
+      if (gridEnabled) drawGrid();
     }
 
     function updateGrid() {
@@ -84,12 +97,6 @@
       hLines = parseInt(document.getElementById('hSlider').value);
       document.getElementById('vValue').textContent = vLines;
       document.getElementById('hValue').textContent = hLines;
-      if (gridEnabled) drawGrid();
-    }
-
-    function toggleGrid() {
-      gridEnabled = !gridEnabled;
-      gridCanvas.style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
     }
 
@@ -117,6 +124,10 @@
       }
     }
 
+    function cropImage() {
+      alert("Crop tool is coming in the next update! ✨");
+    }
+
     function downloadImage() {
       tempCanvas.width = img.naturalWidth || img.width;
       tempCanvas.height = img.naturalHeight || img.height;
@@ -130,7 +141,7 @@
     }
 
     function backToHome() {
-      localStorage.removeItem('colorlessImage'); // Optional cleanup
+      localStorage.removeItem('colorlessImage');
       window.location.href = 'index.html';
     }
 
