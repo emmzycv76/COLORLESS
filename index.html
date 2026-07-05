@@ -36,10 +36,10 @@
   <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
 
   <div id="imageControls" class="controls">
-    <label>Vertical: <span id="vValue">10</span></label>
-    <input type="range" id="vSlider" min="4" max="20" value="10" oninput="updateGrid()">
-    <label>Horizontal: <span id="hValue">10</span></label>
-    <input type="range" id="hSlider" min="4" max="20" value="10" oninput="updateGrid()">
+    <label>Vertical Lines: <span id="vValue">20</span></label>
+    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    <label>Horizontal Lines: <span id="hValue">20</span></label>
+    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
     <button onclick="toggleGrid()">🗼 Toggle Grid</button>
     <button id="downloadBtn" onclick="downloadImage()" style="display:none;">⬇️ Download with Grid</button>
   </div>
@@ -72,8 +72,8 @@
   <script>
     let pickedColors = [];
     let gridEnabled = false;
-    let vLines = 10;
-    let hLines = 10;
+    let vLines = 20;
+    let hLines = 20;
 
     const img = document.getElementById('uploadedImage');
     const gridCanvas = document.getElementById('gridCanvas');
@@ -241,7 +241,7 @@
         fetch('https://formspree.io/f/xjgqpqav', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ feedback: text })
+          body: JSON.stringify({ feedback: text, email: 'mauricemonroe509@gmail.com' })
         }).then(() => {
           alert("Feedback sent to mauricemonroe509@gmail.com");
           document.getElementById('feedbackText').value = '';
