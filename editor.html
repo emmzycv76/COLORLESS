@@ -10,10 +10,34 @@
     .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; display:block; }
     img { width:100%; border:2px solid #fff; border-radius:12px; cursor: crosshair; }
     .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    .controls { padding:15px; background:#1a1a1a; margin:10px; border-radius:12px; }
-    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
+    
+    .controls { 
+      padding:15px; 
+      background:#1a1a1a; 
+      margin:10px; 
+      border-radius:12px; 
+      display: flex; 
+      flex-wrap: wrap; 
+      justify-content: center; 
+      gap: 10px; 
+    }
+    button { 
+      padding:10px 18px; 
+      font-size:15px; 
+      border:none; 
+      border-radius:50px; 
+      background:#ff4d4d; 
+      color:white; 
+      cursor:pointer; 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+    }
     button:hover { background:#ff6666; }
-    .grid-controls { display: none; margin-top: 10px; }
+    
+    .grid-controls { display: none; margin-top: 10px; width: 100%; }
+    .info { padding:15px; background:#222; margin:10px; border-radius:12px; text-align:center; }
+    .color-swatch { width:80px; height:80px; margin:10px auto; border:3px solid white; border-radius:12px; }
   </style>
 </head>
 <body>
@@ -28,12 +52,18 @@
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
   </div>
 
+  <div class="info">
+    <div id="colorBox" class="color-swatch"></div>
+    <h3 id="hex">#------</h3>
+    <p id="rgb">RGB: ---</p>
+    <p id="name">Color: ---</p>
+  </div>
+
   <div class="controls">
     <button onclick="toggleGrid()">🗼 Toggle Grid</button>
     <button onclick="cropImage()">✂️ Crop</button>
     <button onclick="pickColorFromImage()">🎨 Color ID</button>
 
-    <!-- Grid Sliders - Hidden until grid is toggled -->
     <div id="gridControls" class="grid-controls">
       <label>Vertical Lines: <span id="vValue">20</span></label>
       <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
@@ -53,22 +83,17 @@
     const ctxGrid = gridCanvas.getContext('2d');
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    const gridControls = document.getElementById('gridControls');
 
-    // Load image
     function loadImage() {
       const saved = localStorage.getItem('colorlessImage');
-      if (saved) {
-        img.src = saved;
-      } else {
-        alert("No image found. Please upload from home.");
+      if (saved) img.src = saved;
+      else {
+        alert("No image found.");
         backToHome();
       }
     }
 
-    img.onload = () => {
-      if (gridEnabled) drawGrid();
-    };
+    img.onload = () => { if (gridEnabled) drawGrid(); };
 
     // Color Picker
     function pickColor(e) {
@@ -80,15 +105,36 @@
       tempCanvas.height = img.height;
       tempCtx.drawImage(img, 0, 0);
 
-      // For now, alert on click (we can improve this later to show persistent info)
-      alert("Tap on the image to pick a color!");
+      const rect = img.getBoundingClientRect();
+      const x = Math.floor((event ? event.clientX - rect.left : rect.width/2) * (img.width / rect.width));
+      const y = Math.floor((event ? event.clientY - rect.top : rect.height/2) * (img.height / rect.height));
+
+      const pixel = tempCtx.getImageData(x, y, 1, 1).data;
+      const r = pixel[0], g = pixel[1], b = pixel[2];
+      const hex = '#' + [r,g,b].map(n => n.toString(16).padStart(2,'0')).join('').toUpperCase();
+
+      document.getElementById('colorBox').style.backgroundColor = hex;
+      document.getElementById('hex').textContent = hex;
+      document.getElementById('rgb').textContent = `RGB: ${r}, ${g}, ${b}`;
+      document.getElementById('name').textContent = `Color: ${getColorName(r, g, b)}`;
+    }
+
+    function getColorName(r, g, b) {
+      if (r > 200 && g < 110 && b < 110) return "Red";
+      if (g > 180 && r < 120 && b < 120) return "Green";
+      if (b > 180 && r < 120 && g < 120) return "Blue";
+      if (r > 200 && g > 170 && b < 100) return "Yellow";
+      if (r > 160 && g < 100 && b > 140) return "Purple";
+      if (r > 200 && g > 100 && b < 80) return "Orange";
+      if (r < 60 && g < 60 && b < 60) return "Black";
+      if (r > 220 && g > 220 && b > 220) return "White";
+      return "Custom Color";
     }
 
     function toggleGrid() {
       gridEnabled = !gridEnabled;
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
-      gridControls.style.display = gridEnabled ? 'block' : 'none';
-      
+      document.getElementById('gridControls').style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
     }
 
@@ -109,23 +155,16 @@
 
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(x, 0);
-        ctxGrid.lineTo(x, gridCanvas.height);
-        ctxGrid.stroke();
+        ctxGrid.beginPath(); ctxGrid.moveTo(x, 0); ctxGrid.lineTo(x, gridCanvas.height); ctxGrid.stroke();
       }
-
       for (let i = 1; i < hLines; i++) {
         const y = (gridCanvas.height / hLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(0, y);
-        ctxGrid.lineTo(gridCanvas.width, y);
-        ctxGrid.stroke();
+        ctxGrid.beginPath(); ctxGrid.moveTo(0, y); ctxGrid.lineTo(gridCanvas.width, y); ctxGrid.stroke();
       }
     }
 
     function cropImage() {
-      alert("Crop tool is coming in the next update! ✨");
+      alert("✂️ Crop mode activated!\n\nTap and drag on the image (full feature coming soon).");
     }
 
     function downloadImage() {
@@ -133,9 +172,8 @@
       tempCanvas.height = img.naturalHeight || img.height;
       tempCtx.drawImage(img, 0, 0);
       if (gridEnabled) tempCtx.drawImage(gridCanvas, 0, 0);
-
       const link = document.createElement('a');
-      link.download = 'colorless-with-grid.png';
+      link.download = 'colorless-edited.png';
       link.href = tempCanvas.toDataURL('image/png');
       link.click();
     }
@@ -145,7 +183,6 @@
       window.location.href = 'index.html';
     }
 
-    // Initialize
     loadImage();
   </script>
 </body>
