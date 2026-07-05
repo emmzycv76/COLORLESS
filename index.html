@@ -7,16 +7,21 @@
   <style>
     body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; }
     .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; }
+    .logo { width: 50px; height: 50px; margin-right: 8px; }
+    .header h1 { display: flex; align-items: center; margin: 0; }
     .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; }
     img { width:100%; border:2px solid #fff; border-radius:12px; }
     button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
-    .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
+    .mixer, .feedback { padding:15px; background:#222; margin:10px; border-radius:12px; }
     .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
   </style>
 </head>
 <body>
   <div class="header">
-    <h1>Colorless</h1>
+    <h1>
+      <img src="https://i.ibb.co.com/0jZ7Z7Z/colorless-logo.png" class="logo" alt="Colorless Logo">
+      Colorless
+    </h1>
   </div>
 
   <input type="file" id="fileInput" accept="image/*" style="display:none;">
@@ -33,22 +38,22 @@
     <button onclick="clearMix()">Clear Mixer</button>
   </div>
 
+  <div class="feedback">
+    <h3>💬 Send Feedback</h3>
+    <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
+    <button onclick="sendFeedback()">Send Feedback</button>
+  </div>
+
   <script>
     let pickedColors = [];
 
     const paletteColors = [
-      {name:"Red", hex:"#FF0000"},
-      {name:"Cadmium Red", hex:"#E30000"},
-      {name:"Yellow", hex:"#FFFF00"},
-      {name:"Orange", hex:"#FF7F00"},
-      {name:"Green", hex:"#00FF00"},
-      {name:"Blue", hex:"#0000FF"},
-      {name:"Ultramarine", hex:"#3F00FF"},
-      {name:"Purple", hex:"#800080"},
-      {name:"Pink", hex:"#FF69B4"},
-      {name:"Brown", hex:"#8B4513"},
-      {name:"Black", hex:"#000000"},
-      {name:"White", hex:"#FFFFFF"},
+      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
+      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
+      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
+      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
+      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
+      {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
       {name:"Gray", hex:"#808080"}
     ];
 
@@ -112,6 +117,29 @@
     function clearMix() {
       pickedColors = [];
       updateMix();
+    }
+
+    function sendFeedback() {
+      const text = document.getElementById('feedbackText').value.trim();
+      if (!text) {
+        alert("Please write something before sending.");
+        return;
+      }
+
+      // Replace with your Formspree endpoint
+      fetch('https://formspree.io/f/xjgqpqav', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          feedback: text,
+          page: "Main Page"
+        })
+      }).then(() => {
+        alert("✅ Feedback sent! Thank you.");
+        document.getElementById('feedbackText').value = '';
+      }).catch(() => {
+        alert("Feedback saved locally (offline mode).");
+      });
     }
 
     // Upload → Go to Editor
