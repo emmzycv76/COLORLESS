@@ -9,7 +9,7 @@
     .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; }
     .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; }
     img { width:100%; border:2px solid #fff; border-radius:12px; }
-    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; }
+    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
     .info, .mixer { padding:15px; background:#222; margin:10px; border-radius:12px; }
     .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
   </style>
@@ -26,42 +26,102 @@
     <img id="mainImage" style="display:none;">
   </div>
 
-  <div class="info">
-    <div id="colorBox" class="color-swatch" style="width:90px;height:90px"></div>
-    <h2 id="hex">#------</h2>
-    <p id="rgb">RGB: ---</p>
-    <p id="name">Color: ---</p>
-  </div>
-
   <div class="mixer">
     <h3>🎨 Color Mixer</h3>
     <div id="palette"></div>
+    <div id="mixedResult" style="margin:20px 0; min-height:120px;"></div>
+    <button onclick="clearMix()">Clear Mixer</button>
   </div>
 
   <script>
-    let currentImageData = null;
+    let pickedColors = [];
 
-    const paletteColors = ["#FF0000","#FFFF00","#00FF00","#0000FF","#FF00FF","#FFA500"];
+    const paletteColors = [
+      {name:"Red", hex:"#FF0000"},
+      {name:"Cadmium Red", hex:"#E30000"},
+      {name:"Yellow", hex:"#FFFF00"},
+      {name:"Orange", hex:"#FF7F00"},
+      {name:"Green", hex:"#00FF00"},
+      {name:"Blue", hex:"#0000FF"},
+      {name:"Ultramarine", hex:"#3F00FF"},
+      {name:"Purple", hex:"#800080"},
+      {name:"Pink", hex:"#FF69B4"},
+      {name:"Brown", hex:"#8B4513"},
+      {name:"Black", hex:"#000000"},
+      {name:"White", hex:"#FFFFFF"},
+      {name:"Gray", hex:"#808080"}
+    ];
+
     const paletteDiv = document.getElementById('palette');
-    paletteColors.forEach(hex => {
+    paletteColors.forEach(c => {
       const sw = document.createElement('div');
       sw.className = 'color-swatch';
-      sw.style.background = hex;
+      sw.style.background = c.hex;
+      sw.title = c.name;
+      sw.onclick = () => addToMix(c);
       paletteDiv.appendChild(sw);
     });
 
+    function addToMix(c) {
+      pickedColors.push(c);
+      if (pickedColors.length > 8) pickedColors.shift();
+      updateMix();
+    }
+
+    function updateMix() {
+      const result = document.getElementById('mixedResult');
+      if (pickedColors.length === 0) {
+        result.innerHTML = '<p>Tap swatches to mix colors</p>';
+        return;
+      }
+
+      let r = 0, g = 0, b = 0;
+      pickedColors.forEach(c => {
+        const h = c.hex.replace('#','');
+        r += parseInt(h.substr(0,2), 16);
+        g += parseInt(h.substr(2,2), 16);
+        b += parseInt(h.substr(4,2), 16);
+      });
+
+      r = Math.floor(r / pickedColors.length);
+      g = Math.floor(g / pickedColors.length);
+      b = Math.floor(b / pickedColors.length);
+
+      const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
+      const mixedName = getMixedColorName(r, g, b);
+
+      result.innerHTML = `
+        <div class="color-swatch" style="background:${hex}; width:110px; height:110px; display:block; margin:10px auto;"></div>
+        <strong>${hex}</strong><br>
+        <small>${mixedName}</small>
+      `;
+    }
+
+    function getMixedColorName(r, g, b) {
+      if (r > 200 && g < 110 && b < 110) return "Reddish";
+      if (g > 180 && r < 120 && b < 120) return "Greenish";
+      if (b > 180 && r < 120 && g < 120) return "Bluish";
+      if (r > 200 && g > 170 && b < 100) return "Yellowish";
+      if (r > 160 && g < 100 && b > 140) return "Purplish";
+      if (r > 200 && g > 100 && b < 80) return "Orange";
+      if (r < 60 && g < 60 && b < 60) return "Dark";
+      if (r > 220 && g > 220 && b > 220) return "Light / White";
+      return "Mixed Color";
+    }
+
+    function clearMix() {
+      pickedColors = [];
+      updateMix();
+    }
+
+    // Upload → Go to Editor
     document.getElementById('fileInput').addEventListener('change', e => {
       const file = e.target.files[0];
       if (!file) return;
 
       const reader = new FileReader();
       reader.onload = ev => {
-        currentImageData = ev.target.result;
-        document.getElementById('mainImage').src = currentImageData;
-        document.getElementById('mainImage').style.display = 'block';
-
-        // Save image and go to editor
-        localStorage.setItem('colorlessImage', currentImageData);
+        localStorage.setItem('colorlessImage', ev.target.result);
         window.location.href = 'editor.html';
       };
       reader.readAsDataURL(file);
