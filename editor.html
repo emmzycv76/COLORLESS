@@ -16,7 +16,15 @@
       position:fixed; bottom:0; left:0; right:0; 
       background:#1a1a1a; padding:12px; 
       display:flex; justify-content:center; gap:10px; 
-      z-index:101; border-top:1px solid #333; 
+      z-index:102; border-top:1px solid #333; 
+    }
+    .grid-controls { 
+      position:fixed; bottom:70px; left:0; right:0; 
+      background:rgba(26, 26, 26, 0.85); /* Semi-transparent */
+      padding:12px; 
+      display: none; 
+      z-index:101; 
+      border-top:1px solid #333; 
     }
     .image-container { 
       position:relative; 
@@ -24,14 +32,14 @@
       justify-content:center; 
       align-items:center; 
       max-width:100%; 
-      max-height: calc(100vh - 220px); /* Reduced height to make room for sliders */
+      max-height: calc(100vh - 240px); 
       margin: 15px auto; 
       padding: 0 10px; 
       overflow: hidden; 
     }
     img, canvas { 
       max-width: 100%; 
-      max-height: calc(100vh - 220px); 
+      max-height: calc(100vh - 240px); 
       border:2px solid #fff; 
       border-radius:12px; 
       cursor: crosshair; 
@@ -47,10 +55,6 @@
     }
     button:hover { background:#ff6666; }
 
-    .grid-controls { 
-      display: none; margin: 8px auto; padding:12px; background:#222; border-radius:12px; 
-      max-width: 600px; 
-    }
     .info { 
       padding:10px; background:#222; margin:12px; border-radius:12px; 
       text-align:center; display: none; 
@@ -70,7 +74,7 @@
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
   </div>
 
-  <!-- Color Info (smaller) -->
+  <!-- Color Info -->
   <div id="colorInfo" class="info">
     <div id="colorBox" class="color-swatch"></div>
     <h3 id="hex">#------</h3>
@@ -79,20 +83,20 @@
     <button onclick="hideColorInfo()">Close</button>
   </div>
 
-  <!-- Bottom Toolbar -->
-  <div class="bottom-toolbar">
-    <button onclick="toggleGrid()">🗼 Grid</button>
-    <button onclick="startCrop()">✂️ Crop</button>
-    <button onclick="activateColorPicker()">🎨 Color ID</button>
-  </div>
-
-  <!-- Grid Controls -->
+  <!-- Grid Controls (fixed above bottom toolbar) -->
   <div id="gridControls" class="grid-controls">
     <label>Vertical Lines: <span id="vValue">20</span></label>
     <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
     
     <label>Horizontal Lines: <span id="hValue">20</span></label>
     <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
+  </div>
+
+  <!-- Bottom Toolbar -->
+  <div class="bottom-toolbar">
+    <button onclick="toggleGrid()">🗼 Grid</button>
+    <button onclick="startCrop()">✂️ Crop</button>
+    <button onclick="activateColorPicker()">🎨 Color ID</button>
   </div>
 
   <script>
@@ -167,8 +171,7 @@
     function toggleGrid() {
       gridEnabled = !gridEnabled;
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
-      const controls = document.getElementById('gridControls');
-      controls.style.display = gridEnabled ? 'block' : 'none';
+      document.getElementById('gridControls').style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
     }
 
