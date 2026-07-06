@@ -20,7 +20,7 @@
     }
     .grid-controls { 
       position:fixed; bottom:70px; left:0; right:0; 
-      background:rgba(26, 26, 26, 0.65); /* More transparent */
+      background:rgba(26, 26, 26, 0.70); /* ~30% transparency */
       padding:12px 15px; 
       display: none; 
       z-index:102; 
@@ -36,7 +36,7 @@
       margin: 15px auto; 
       padding: 0 10px; 
       overflow: hidden; 
-      background: #111; /* Prevents layout shift */
+      background: #111; 
     }
     img, canvas { 
       max-width: 100%; 
@@ -86,11 +86,15 @@
 
   <!-- Grid Controls -->
   <div id="gridControls" class="grid-controls">
-    <label>Vertical Lines: <span id="vValue">20</span></label>
-    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
-    
-    <label>Horizontal Lines: <span id="hValue">20</span></label>
-    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+      <span>Vertical Lines: <span id="vValue">20</span></span>
+      <span>Horizontal Lines: <span id="hValue">20</span></span>
+    </div>
+    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()" style="width:100%; margin-bottom:8px;">
+    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()" style="width:100%; margin-bottom:12px;">
+
+    <label style="font-size:13px;">Grid Color</label>
+    <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;"></div>
   </div>
 
   <!-- Bottom Toolbar -->
@@ -104,6 +108,7 @@
     let gridEnabled = false;
     let vLines = 20;
     let hLines = 20;
+    let gridColor = '#000000';
     let isColorPickerActive = false;
 
     const img = document.getElementById('editorImage');
@@ -111,6 +116,24 @@
     const ctxGrid = gridCanvas.getContext('2d');
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
+
+    // Grid Color Palette (same as mixer)
+    const gridColors = ['#000000', '#FFFFFF', '#FF0000', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#FFA500', '#808080'];
+    const colorPalette = document.getElementById('gridColorPalette');
+    gridColors.forEach(hex => {
+      const sw = document.createElement('div');
+      sw.style.width = '28px';
+      sw.style.height = '28px';
+      sw.style.background = hex;
+      sw.style.border = '2px solid white';
+      sw.style.borderRadius = '6px';
+      sw.style.cursor = 'pointer';
+      sw.onclick = () => {
+        gridColor = hex;
+        if (gridEnabled) drawGrid();
+      };
+      colorPalette.appendChild(sw);
+    });
 
     function loadImage() {
       const saved = localStorage.getItem('colorlessImage');
@@ -188,7 +211,7 @@
       gridCanvas.width = img.clientWidth;
       gridCanvas.height = img.clientHeight;
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
-      ctxGrid.strokeStyle = '#000000';
+      ctxGrid.strokeStyle = gridColor;
       ctxGrid.lineWidth = 1.5;
 
       for (let i = 1; i < vLines; i++) {
@@ -214,7 +237,7 @@
         gridTemp.width = w;
         gridTemp.height = h;
         const gCtx = gridTemp.getContext('2d');
-        gCtx.strokeStyle = '#000000';
+        gCtx.strokeStyle = gridColor;
         gCtx.lineWidth = 2;
 
         for (let i = 1; i < vLines; i++) {
