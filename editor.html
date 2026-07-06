@@ -5,24 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Colorless - Editor</title>
   <style>
-    body { margin:0; font-family: Arial; background: #111; color: white; }
-    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; position:sticky; top:0; z-index:100; }
-    .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; display:block; }
+    body { 
+      margin:0; font-family: Arial; background: #111; color: white; 
+    }
+    .top-bar { 
+      display:flex; justify-content:space-between; align-items:center; 
+      padding:10px; background:#1a1a1a; position:sticky; top:0; z-index:100; 
+    }
+    .bottom-toolbar { 
+      position:fixed; bottom:0; left:0; right:0; 
+      background:#1a1a1a; padding:12px; 
+      display:flex; justify-content:center; gap:10px; 
+      z-index:101; border-top:1px solid #333; 
+    }
+    .container { 
+      position:relative; display:block; max-width:600px; 
+      margin:70px auto 90px; 
+    }
     img, canvas { width:100%; border:2px solid #fff; border-radius:12px; cursor: crosshair; }
     .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    .controls { padding:12px; background:#1a1a1a; margin:10px; border-radius:12px; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
-    button { padding:10px 16px; font-size:14px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; display:flex; align-items:center; gap:6px; }
+
+    button { 
+      padding:10px 18px; font-size:15px; border:none; border-radius:50px; 
+      background:#ff4d4d; color:white; cursor:pointer; display:flex; align-items:center; gap:6px; 
+    }
     button:hover { background:#ff6666; }
-    .info { padding:12px; background:#222; margin:10px; border-radius:12px; text-align:center; display: none; }
-    .color-swatch { width:60px; height:60px; margin:8px auto; border:3px solid white; border-radius:10px; }
-    .grid-controls { display: none; margin-top: 8px; width: 100%; }
+
+    .grid-controls { 
+      display: none; margin-top: 8px; padding:10px; background:#222; border-radius:12px; 
+    }
+    .info { 
+      padding:12px; background:#222; margin:15px; border-radius:12px; 
+      text-align:center; display: none; 
+    }
+    .color-swatch { width:65px; height:65px; margin:10px auto; border:3px solid white; border-radius:12px; }
   </style>
 </head>
 <body>
-  <div class="header">
+  <!-- Top Bar -->
+  <div class="top-bar">
     <button onclick="backToHome()">← Back</button>
-    <h2>Editor</h2>
-    <button onclick="downloadImage()">⬇️ Download with Grid</button>
+    <button onclick="downloadImage()">⬇️ with grid</button>
   </div>
 
   <div class="container">
@@ -30,6 +53,7 @@
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
   </div>
 
+  <!-- Color Info -->
   <div id="colorInfo" class="info">
     <div id="colorBox" class="color-swatch"></div>
     <h3 id="hex">#------</h3>
@@ -38,24 +62,27 @@
     <button onclick="hideColorInfo()">Close</button>
   </div>
 
-  <div class="controls">
+  <!-- Bottom Toolbar -->
+  <div class="bottom-toolbar">
     <button onclick="toggleGrid()">🗼 Grid</button>
     <button onclick="startCrop()">✂️ Crop</button>
     <button onclick="activateColorPicker()">🎨 Color ID</button>
+  </div>
 
-    <div id="gridControls" class="grid-controls">
-      <label>Vertical: <span id="vValue">20</span></label>
-      <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
-      <label>Horizontal: <span id="hValue">20</span></label>
-      <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
-    </div>
+  <!-- Grid Controls (slides up when grid is on) -->
+  <div id="gridControls" class="grid-controls">
+    <label>Vertical Lines: <span id="vValue">20</span></label>
+    <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
+    
+    <label>Horizontal Lines: <span id="hValue">20</span></label>
+    <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()">
   </div>
 
   <script>
     let gridEnabled = false;
-    let vLines = 20, hLines = 20;
+    let vLines = 20;
+    let hLines = 20;
     let isColorPickerActive = false;
-    let isCropping = false;
 
     const img = document.getElementById('editorImage');
     const gridCanvas = document.getElementById('gridCanvas');
@@ -69,14 +96,12 @@
       else backToHome();
     }
 
-    img.onload = () => {
-      if (gridEnabled) drawGrid();
-    };
+    img.onload = () => { if (gridEnabled) drawGrid(); };
 
-    // ==================== COLOR ID ====================
+    // Color Picker
     function activateColorPicker() {
       isColorPickerActive = true;
-      alert("🎨 Tap on the image to pick color");
+      alert("🎨 Tap on the image to pick a color");
     }
 
     function pickColor(e) {
@@ -88,8 +113,8 @@
       tempCtx.drawImage(img, 0, 0);
 
       const rect = img.getBoundingClientRect();
-      const scaleX = img.naturalWidth / rect.width;
-      const scaleY = img.naturalHeight / rect.height;
+      const scaleX = (img.naturalWidth || img.width) / rect.width;
+      const scaleY = (img.naturalHeight || img.height) / rect.height;
 
       const x = Math.floor((e.clientX - rect.left) * scaleX);
       const y = Math.floor((e.clientY - rect.top) * scaleY);
@@ -101,7 +126,7 @@
       document.getElementById('colorBox').style.backgroundColor = hex;
       document.getElementById('hex').textContent = hex;
       document.getElementById('rgb').textContent = `RGB: ${r}, ${g}, ${b}`;
-      document.getElementById('name').textContent = `Color: ${getColorName(r,g,b)}`;
+      document.getElementById('name').textContent = `Color: ${getColorName(r, g, b)}`;
       document.getElementById('colorInfo').style.display = 'block';
     }
 
@@ -121,11 +146,12 @@
       document.getElementById('colorInfo').style.display = 'none';
     }
 
-    // ==================== GRID ====================
+    // Grid
     function toggleGrid() {
       gridEnabled = !gridEnabled;
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
-      document.getElementById('gridControls').style.display = gridEnabled ? 'block' : 'none';
+      const controls = document.getElementById('gridControls');
+      controls.style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
     }
 
@@ -146,54 +172,39 @@
 
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(x, 0);
-        ctxGrid.lineTo(x, gridCanvas.height);
-        ctxGrid.stroke();
+        ctxGrid.beginPath(); ctxGrid.moveTo(x, 0); ctxGrid.lineTo(x, gridCanvas.height); ctxGrid.stroke();
       }
       for (let i = 1; i < hLines; i++) {
         const y = (gridCanvas.height / hLines) * i;
-        ctxGrid.beginPath();
-        ctxGrid.moveTo(0, y);
-        ctxGrid.lineTo(gridCanvas.width, y);
-        ctxGrid.stroke();
+        ctxGrid.beginPath(); ctxGrid.moveTo(0, y); ctxGrid.lineTo(gridCanvas.width, y); ctxGrid.stroke();
       }
     }
 
-    // ==================== DOWNLOAD (Fixed) ====================
+    // Download
     function downloadImage() {
-      const originalWidth = img.naturalWidth || img.width;
-      const originalHeight = img.naturalHeight || img.height;
+      const w = img.naturalWidth || img.width;
+      const h = img.naturalHeight || img.height;
 
-      tempCanvas.width = originalWidth;
-      tempCanvas.height = originalHeight;
-      tempCtx.drawImage(img, 0, 0, originalWidth, originalHeight);
+      tempCanvas.width = w;
+      tempCanvas.height = h;
+      tempCtx.drawImage(img, 0, 0, w, h);
 
       if (gridEnabled) {
-        // Draw grid at full resolution
         const gridTemp = document.createElement('canvas');
-        gridTemp.width = originalWidth;
-        gridTemp.height = originalHeight;
+        gridTemp.width = w;
+        gridTemp.height = h;
         const gCtx = gridTemp.getContext('2d');
-
         gCtx.strokeStyle = '#000000';
         gCtx.lineWidth = 2;
 
         for (let i = 1; i < vLines; i++) {
-          const x = (originalWidth / vLines) * i;
-          gCtx.beginPath();
-          gCtx.moveTo(x, 0);
-          gCtx.lineTo(x, originalHeight);
-          gCtx.stroke();
+          const x = (w / vLines) * i;
+          gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, h); gCtx.stroke();
         }
         for (let i = 1; i < hLines; i++) {
-          const y = (originalHeight / hLines) * i;
-          gCtx.beginPath();
-          gCtx.moveTo(0, y);
-          gCtx.lineTo(originalWidth, y);
-          gCtx.stroke();
+          const y = (h / hLines) * i;
+          gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(w, y); gCtx.stroke();
         }
-
         tempCtx.drawImage(gridTemp, 0, 0);
       }
 
@@ -203,10 +214,8 @@
       link.click();
     }
 
-    // ==================== CROP ====================
     function startCrop() {
-      alert("✂️ Crop mode: Click and drag on the image");
-      // (existing crop logic remains)
+      alert("✂️ Crop mode: Click and drag on the image (basic version)");
     }
 
     function backToHome() {
