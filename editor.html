@@ -96,14 +96,14 @@
     <label style="font-size:13px; display:block; margin-bottom:6px;">Grid Color</label>
     <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
-    <!-- Hold to Hide Button -->
+    <!-- Smaller Hide Button -->
     <button id="hideBtn" 
-            style="margin-top:12px; background:#333; width:100%;"
+            style="margin-top:12px; background:#333; width:100%; font-size:14px; padding:8px;"
             onmousedown="hideControls(true)" 
             onmouseup="hideControls(false)"
             ontouchstart="hideControls(true)"
             ontouchend="hideControls(false)">
-      Hold to Hide Controls
+      Hide Controls
     </button>
   </div>
 
@@ -272,7 +272,7 @@
     }
 
     function hideControls(hide) {
-      document.getElementById('gridControls').style.opacity = hide ? '0.1' : '1';
+      document.getElementById('gridControls').style.opacity = hide ? '0.15' : '1';
     }
 
     function backToHome() {
