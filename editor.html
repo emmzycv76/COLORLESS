@@ -54,7 +54,14 @@
     <label style="font-size:13px; display:block; margin-bottom:6px;">Grid Color</label>
     <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
-    <button onclick="toggleGrid()" style="margin-top:12px; background:#333; width:100%; font-size:14px;">Hide Controls</button>
+    <button id="hideBtn" 
+            style="margin-top:12px; background:#333; width:100%; font-size:14px;"
+            onmousedown="hideControls(true)" 
+            onmouseup="hideControls(false)"
+            ontouchstart="hideControls(true)"
+            ontouchend="hideControls(false)">
+      Hold to Hide
+    </button>
   </div>
 
   <div class="bottom-toolbar">
@@ -89,27 +96,50 @@
       sw.style.border = '2px solid white';
       sw.style.borderRadius = '6px';
       sw.style.cursor = 'pointer';
-      sw.onclick = () => { gridColor = hex; if (gridEnabled) drawGrid(); };
+      sw.onclick = () => { 
+        gridColor = hex; 
+        if (gridEnabled) drawGrid(); 
+        saveState();
+      };
       colorPalette.appendChild(sw);
     });
 
     function saveState() {
       history = history.slice(0, historyIndex + 1);
-      history.push(img.src);
+      const state = { src: img.src, v: vLines, h: hLines, color: gridColor };
+      history.push(state);
       historyIndex++;
     }
 
     function undo() {
       if (historyIndex > 0) {
         historyIndex--;
-        img.src = history[historyIndex];
+        const state = history[historyIndex];
+        img.src = state.src;
+        vLines = state.v;
+        hLines = state.h;
+        gridColor = state.color;
+        document.getElementById('vSlider').value = vLines;
+        document.getElementById('hSlider').value = hLines;
+        document.getElementById('vValue').textContent = vLines;
+        document.getElementById('hValue').textContent = hLines;
+        if (gridEnabled) drawGrid();
       }
     }
 
     function redo() {
       if (historyIndex < history.length - 1) {
         historyIndex++;
-        img.src = history[historyIndex];
+        const state = history[historyIndex];
+        img.src = state.src;
+        vLines = state.v;
+        hLines = state.h;
+        gridColor = state.color;
+        document.getElementById('vSlider').value = vLines;
+        document.getElementById('hSlider').value = hLines;
+        document.getElementById('vValue').textContent = vLines;
+        document.getElementById('hValue').textContent = hLines;
+        if (gridEnabled) drawGrid();
       }
     }
 
@@ -175,6 +205,7 @@
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
       document.getElementById('gridControls').style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
+      saveState();
     }
 
     function updateGrid() {
@@ -236,7 +267,11 @@
     }
 
     function startCrop() {
-      alert("Crop tool is coming in the next update.");
+      alert("Crop tool coming soon.");
+    }
+
+    function hideControls(hide) {
+      document.getElementById('gridControls').style.opacity = hide ? '0.15' : '1';
     }
 
     function backToHome() {
