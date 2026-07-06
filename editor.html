@@ -16,15 +16,15 @@
       position:fixed; bottom:0; left:0; right:0; 
       background:#1a1a1a; padding:12px; 
       display:flex; justify-content:center; gap:10px; 
-      z-index:102; border-top:1px solid #333; 
+      z-index:103; border-top:1px solid #333; 
     }
     .grid-controls { 
       position:fixed; bottom:70px; left:0; right:0; 
-      background:rgba(26, 26, 26, 0.85); /* Semi-transparent */
-      padding:12px; 
+      background:rgba(26, 26, 26, 0.65); /* More transparent */
+      padding:12px 15px; 
       display: none; 
-      z-index:101; 
-      border-top:1px solid #333; 
+      z-index:102; 
+      border-top:1px solid rgba(255,255,255,0.1); 
     }
     .image-container { 
       position:relative; 
@@ -32,14 +32,15 @@
       justify-content:center; 
       align-items:center; 
       max-width:100%; 
-      max-height: calc(100vh - 240px); 
+      max-height: calc(100vh - 245px); 
       margin: 15px auto; 
       padding: 0 10px; 
       overflow: hidden; 
+      background: #111; /* Prevents layout shift */
     }
     img, canvas { 
       max-width: 100%; 
-      max-height: calc(100vh - 240px); 
+      max-height: calc(100vh - 245px); 
       border:2px solid #fff; 
       border-radius:12px; 
       cursor: crosshair; 
@@ -83,7 +84,7 @@
     <button onclick="hideColorInfo()">Close</button>
   </div>
 
-  <!-- Grid Controls (fixed above bottom toolbar) -->
+  <!-- Grid Controls -->
   <div id="gridControls" class="grid-controls">
     <label>Vertical Lines: <span id="vValue">20</span></label>
     <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()">
