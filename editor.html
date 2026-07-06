@@ -20,7 +20,7 @@
     }
     .grid-controls { 
       position:fixed; bottom:70px; left:0; right:0; 
-      background:rgba(26, 26, 26, 0.70); /* ~30% transparency */
+      background:rgba(26, 26, 26, 0.70); 
       padding:12px 15px; 
       display: none; 
       z-index:102; 
@@ -86,15 +86,25 @@
 
   <!-- Grid Controls -->
   <div id="gridControls" class="grid-controls">
-    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+    <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
       <span>Vertical Lines: <span id="vValue">20</span></span>
       <span>Horizontal Lines: <span id="hValue">20</span></span>
     </div>
     <input type="range" id="vSlider" min="4" max="100" value="20" oninput="updateGrid()" style="width:100%; margin-bottom:8px;">
     <input type="range" id="hSlider" min="4" max="100" value="20" oninput="updateGrid()" style="width:100%; margin-bottom:12px;">
 
-    <label style="font-size:13px;">Grid Color</label>
-    <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;"></div>
+    <label style="font-size:13px; display:block; margin-bottom:6px;">Grid Color</label>
+    <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+
+    <!-- Hold to Hide Button -->
+    <button id="hideBtn" 
+            style="margin-top:12px; background:#333; width:100%;"
+            onmousedown="hideControls(true)" 
+            onmouseup="hideControls(false)"
+            ontouchstart="hideControls(true)"
+            ontouchend="hideControls(false)">
+      Hold to Hide Controls
+    </button>
   </div>
 
   <!-- Bottom Toolbar -->
@@ -117,7 +127,7 @@
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
 
-    // Grid Color Palette (same as mixer)
+    // Grid Color Palette
     const gridColors = ['#000000', '#FFFFFF', '#FF0000', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#FFA500', '#808080'];
     const colorPalette = document.getElementById('gridColorPalette');
     gridColors.forEach(hex => {
@@ -259,6 +269,10 @@
 
     function startCrop() {
       alert("✂️ Crop mode: Click and drag on the image");
+    }
+
+    function hideControls(hide) {
+      document.getElementById('gridControls').style.opacity = hide ? '0.1' : '1';
     }
 
     function backToHome() {
