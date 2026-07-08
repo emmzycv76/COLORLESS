@@ -27,7 +27,7 @@
       <button onclick="undo()" style="background:#444; padding:8px 14px;">↩️</button>
       <button onclick="redo()" style="background:#444; padding:8px 14px;">↪️</button>
     </div>
-    <button onclick="downloadImage()">⬇️ with grid</button>
+    <button onclick="downloadWithAd()">⬇️ with grid</button>
   </div>
 
   <div class="image-container">
@@ -35,6 +35,7 @@
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
   </div>
 
+  <!-- Color Info -->
   <div id="colorInfo" class="info">
     <div id="colorBox" class="color-swatch"></div>
     <h3 id="hex">#------</h3>
@@ -43,6 +44,7 @@
     <button onclick="hideColorInfo()">Close</button>
   </div>
 
+  <!-- Grid Controls -->
   <div id="gridControls" class="grid-controls">
     <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
       <span>Vertical: <span id="vValue">20</span></span>
@@ -64,10 +66,20 @@
     </button>
   </div>
 
+  <!-- Bottom Toolbar -->
   <div class="bottom-toolbar">
     <button onclick="toggleGrid()">🗼 Grid</button>
     <button onclick="startCrop()">✂️ Crop</button>
     <button onclick="activateColorPicker()">🎨 Color ID</button>
+  </div>
+
+  <!-- Ad Modal -->
+  <div id="adModal" class="ad-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.92); align-items:center; justify-content:center; z-index:200;">
+    <div style="background:#222; padding:20px; border-radius:12px; max-width:340px; text-align:center;">
+      <img src="https://raw.githubusercontent.com/emmzycv76/COLORLESS/main/DFB021C8-6EBA-4EEB-B24C-F8DB28F2C674.jpeg" 
+           style="max-width:100%; border-radius:8px; margin-bottom:15px;">
+      <button onclick="closeAdAndDownload()" style="width:100%; padding:12px;">Continue Download</button>
+    </div>
   </div>
 
   <script>
@@ -76,8 +88,6 @@
     let hLines = 20;
     let gridColor = '#000000';
     let isColorPickerActive = false;
-    let history = [];
-    let historyIndex = -1;
 
     const img = document.getElementById('editorImage');
     const gridCanvas = document.getElementById('gridCanvas');
@@ -99,59 +109,19 @@
       sw.onclick = () => { 
         gridColor = hex; 
         if (gridEnabled) drawGrid(); 
-        saveState();
       };
       colorPalette.appendChild(sw);
     });
 
-    function saveState() {
-      history = history.slice(0, historyIndex + 1);
-      const state = { src: img.src, v: vLines, h: hLines, color: gridColor };
-      history.push(state);
-      historyIndex++;
-    }
-
-    function undo() {
-      if (historyIndex > 0) {
-        historyIndex--;
-        const state = history[historyIndex];
-        img.src = state.src;
-        vLines = state.v;
-        hLines = state.h;
-        gridColor = state.color;
-        document.getElementById('vSlider').value = vLines;
-        document.getElementById('hSlider').value = hLines;
-        document.getElementById('vValue').textContent = vLines;
-        document.getElementById('hValue').textContent = hLines;
-        if (gridEnabled) drawGrid();
-      }
-    }
-
-    function redo() {
-      if (historyIndex < history.length - 1) {
-        historyIndex++;
-        const state = history[historyIndex];
-        img.src = state.src;
-        vLines = state.v;
-        hLines = state.h;
-        gridColor = state.color;
-        document.getElementById('vSlider').value = vLines;
-        document.getElementById('hSlider').value = hLines;
-        document.getElementById('vValue').textContent = vLines;
-        document.getElementById('hValue').textContent = hLines;
-        if (gridEnabled) drawGrid();
-      }
-    }
-
     function loadImage() {
       const saved = localStorage.getItem('colorlessImage');
-      if (saved) {
-        img.src = saved;
-        saveState();
-      } else backToHome();
+      if (saved) img.src = saved;
+      else backToHome();
     }
 
-    img.onload = () => { if (gridEnabled) drawGrid(); };
+    img.onload = () => {
+      if (gridEnabled) drawGrid();
+    };
 
     function activateColorPicker() {
       isColorPickerActive = true;
@@ -205,7 +175,6 @@
       gridCanvas.style.display = gridEnabled ? 'block' : 'none';
       document.getElementById('gridControls').style.display = gridEnabled ? 'block' : 'none';
       if (gridEnabled) drawGrid();
-      saveState();
     }
 
     function updateGrid() {
@@ -222,15 +191,32 @@
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = gridColor;
       ctxGrid.lineWidth = 1.5;
+      ctxGrid.font = '10px Arial';
+      ctxGrid.fillStyle = gridColor;
+      ctxGrid.textAlign = 'center';
 
+      // Vertical lines + numbers
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(x, 0); ctxGrid.lineTo(x, gridCanvas.height); ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), x, 12);
       }
+
+      // Horizontal lines + numbers
       for (let i = 1; i < hLines; i++) {
         const y = (gridCanvas.height / hLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(0, y); ctxGrid.lineTo(gridCanvas.width, y); ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), 12, y + 4);
       }
+    }
+
+    function downloadWithAd() {
+      document.getElementById('adModal').style.display = 'flex';
+    }
+
+    function closeAdAndDownload() {
+      document.getElementById('adModal').style.display = 'none';
+      downloadImage();
     }
 
     function downloadImage() {
@@ -248,14 +234,19 @@
         const gCtx = gridTemp.getContext('2d');
         gCtx.strokeStyle = gridColor;
         gCtx.lineWidth = 2;
+        gCtx.font = '12px Arial';
+        gCtx.fillStyle = gridColor;
+        gCtx.textAlign = 'center';
 
         for (let i = 1; i < vLines; i++) {
           const x = (w / vLines) * i;
           gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, h); gCtx.stroke();
+          gCtx.fillText(i.toString(), x, 14);
         }
         for (let i = 1; i < hLines; i++) {
           const y = (h / hLines) * i;
           gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(w, y); gCtx.stroke();
+          gCtx.fillText(i.toString(), 14, y + 4);
         }
         tempCtx.drawImage(gridTemp, 0, 0);
       }
