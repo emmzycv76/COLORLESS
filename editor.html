@@ -12,7 +12,6 @@
     .image-container { position:relative; display:flex; justify-content:center; align-items:center; max-width:100%; max-height: calc(100vh - 245px); margin:15px auto; padding:0 10px; overflow:hidden; background:#111; }
     img, canvas { max-width:100%; max-height:calc(100vh - 245px); border:2px solid #fff; border-radius:12px; cursor:crosshair; object-fit:contain; }
     .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
-    .selection { position:absolute; border:2px dashed #fff; pointer-events:none; box-shadow:0 0 0 9999px rgba(0,0,0,0.4); }
 
     button { padding:10px 18px; font-size:15px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
     button:hover { background:#ff6666; }
@@ -34,7 +33,6 @@
   <div class="image-container">
     <img id="editorImage" onclick="pickColor(event)">
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
-    <canvas id="selectionCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; display:none;"></canvas>
   </div>
 
   <!-- Color Info -->
@@ -58,7 +56,14 @@
     <label style="font-size:13px; display:block; margin-bottom:6px;">Grid Color</label>
     <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
-    <button onclick="toggleGrid()" style="margin-top:12px; background:#333; width:100%; font-size:14px;">Hide Controls</button>
+    <button id="hideBtn" 
+            style="margin-top:12px; background:#333; width:100%; font-size:14px;"
+            onmousedown="hideControls(true)" 
+            onmouseup="hideControls(false)"
+            ontouchstart="hideControls(true)"
+            ontouchend="hideControls(false)">
+      Hold to Hide
+    </button>
   </div>
 
   <!-- Bottom Toolbar -->
@@ -85,16 +90,12 @@
     let isColorPickerActive = false;
     let history = [];
     let historyIndex = -1;
-    let isCropping = false;
-    let startX, startY, currentX, currentY;
 
     const img = document.getElementById('editorImage');
     const gridCanvas = document.getElementById('gridCanvas');
     const ctxGrid = gridCanvas.getContext('2d');
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
-    const selectionCanvas = document.getElementById('selectionCanvas');
-    const selCtx = selectionCanvas.getContext('2d');
 
     // Grid Color Palette
     const gridColors = ['#000000', '#FFFFFF', '#FF0000', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#FFA500', '#808080'];
@@ -234,14 +235,22 @@
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = gridColor;
       ctxGrid.lineWidth = 1.5;
+      ctxGrid.font = 'bold 10px Arial';
+      ctxGrid.fillStyle = gridColor;
+      ctxGrid.textAlign = 'center';
 
+      // Vertical lines + numbers
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(x, 0); ctxGrid.lineTo(x, gridCanvas.height); ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), x, 12);
       }
+
+      // Horizontal lines + numbers
       for (let i = 1; i < hLines; i++) {
         const y = (gridCanvas.height / hLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(0, y); ctxGrid.lineTo(gridCanvas.width, y); ctxGrid.stroke();
+        ctxGrid.fillText(i.toString(), 12, y + 4);
       }
     }
 
@@ -269,14 +278,19 @@
         const gCtx = gridTemp.getContext('2d');
         gCtx.strokeStyle = gridColor;
         gCtx.lineWidth = 2;
+        gCtx.font = 'bold 12px Arial';
+        gCtx.fillStyle = gridColor;
+        gCtx.textAlign = 'center';
 
         for (let i = 1; i < vLines; i++) {
           const x = (w / vLines) * i;
           gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, h); gCtx.stroke();
+          gCtx.fillText(i.toString(), x, 14);
         }
         for (let i = 1; i < hLines; i++) {
           const y = (h / hLines) * i;
           gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(w, y); gCtx.stroke();
+          gCtx.fillText(i.toString(), 14, y + 4);
         }
         tempCtx.drawImage(gridTemp, 0, 0);
       }
@@ -288,8 +302,11 @@
     }
 
     function startCrop() {
-      isCropping = true;
-      alert("Drag on the image to select crop area. Tap Apply when done.");
+      alert("Crop tool coming in the next update.");
+    }
+
+    function hideControls(hide) {
+      document.getElementById('gridControls').style.opacity = hide ? '0.15' : '1';
     }
 
     function backToHome() {
