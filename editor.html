@@ -12,6 +12,7 @@
     .image-container { position:relative; display:flex; justify-content:center; align-items:center; max-width:100%; max-height: calc(100vh - 245px); margin:15px auto; padding:0 10px; overflow:hidden; background:#111; }
     img, canvas { max-width:100%; max-height:calc(100vh - 245px); border:2px solid #fff; border-radius:12px; cursor:crosshair; object-fit:contain; }
     .grid-canvas { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; }
+    .selection { position:absolute; border:2px dashed #fff; pointer-events:none; box-shadow:0 0 0 9999px rgba(0,0,0,0.4); }
 
     button { padding:10px 18px; font-size:15px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
     button:hover { background:#ff6666; }
@@ -33,6 +34,7 @@
   <div class="image-container">
     <img id="editorImage" onclick="pickColor(event)">
     <canvas id="gridCanvas" class="grid-canvas" style="display:none;"></canvas>
+    <canvas id="selectionCanvas" style="position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; display:none;"></canvas>
   </div>
 
   <!-- Color Info -->
@@ -91,6 +93,8 @@
     const ctxGrid = gridCanvas.getContext('2d');
     const tempCanvas = document.createElement('canvas');
     const tempCtx = tempCanvas.getContext('2d');
+    const selectionCanvas = document.getElementById('selectionCanvas');
+    const selCtx = selectionCanvas.getContext('2d');
 
     // Grid Color Palette
     const gridColors = ['#000000', '#FFFFFF', '#FF0000', '#FFFF00', '#00FF00', '#0000FF', '#FF00FF', '#FFA500', '#808080'];
@@ -285,7 +289,7 @@
 
     function startCrop() {
       isCropping = true;
-      alert("Drag on the image to select area, then tap Apply.");
+      alert("Drag on the image to select crop area. Tap Apply when done.");
     }
 
     function backToHome() {
