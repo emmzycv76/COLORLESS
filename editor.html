@@ -56,14 +56,7 @@
     <label style="font-size:13px; display:block; margin-bottom:6px;">Grid Color</label>
     <div id="gridColorPalette" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
 
-    <button id="hideBtn" 
-            style="margin-top:12px; background:#333; width:100%; font-size:14px;"
-            onmousedown="hideControls(true)" 
-            onmouseup="hideControls(false)"
-            ontouchstart="hideControls(true)"
-            ontouchend="hideControls(false)">
-      Hold to Hide
-    </button>
+    <button onclick="toggleGrid()" style="margin-top:12px; background:#333; width:100%; font-size:14px;">Hide Controls</button>
   </div>
 
   <!-- Bottom Toolbar -->
@@ -235,22 +228,14 @@
       ctxGrid.clearRect(0, 0, gridCanvas.width, gridCanvas.height);
       ctxGrid.strokeStyle = gridColor;
       ctxGrid.lineWidth = 1.5;
-      ctxGrid.font = 'bold 10px Arial';
-      ctxGrid.fillStyle = gridColor;
-      ctxGrid.textAlign = 'center';
 
-      // Vertical lines + numbers
       for (let i = 1; i < vLines; i++) {
         const x = (gridCanvas.width / vLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(x, 0); ctxGrid.lineTo(x, gridCanvas.height); ctxGrid.stroke();
-        ctxGrid.fillText(i.toString(), x, 12);
       }
-
-      // Horizontal lines + numbers
       for (let i = 1; i < hLines; i++) {
         const y = (gridCanvas.height / hLines) * i;
         ctxGrid.beginPath(); ctxGrid.moveTo(0, y); ctxGrid.lineTo(gridCanvas.width, y); ctxGrid.stroke();
-        ctxGrid.fillText(i.toString(), 12, y + 4);
       }
     }
 
@@ -278,19 +263,14 @@
         const gCtx = gridTemp.getContext('2d');
         gCtx.strokeStyle = gridColor;
         gCtx.lineWidth = 2;
-        gCtx.font = 'bold 12px Arial';
-        gCtx.fillStyle = gridColor;
-        gCtx.textAlign = 'center';
 
         for (let i = 1; i < vLines; i++) {
           const x = (w / vLines) * i;
           gCtx.beginPath(); gCtx.moveTo(x, 0); gCtx.lineTo(x, h); gCtx.stroke();
-          gCtx.fillText(i.toString(), x, 14);
         }
         for (let i = 1; i < hLines; i++) {
           const y = (h / hLines) * i;
           gCtx.beginPath(); gCtx.moveTo(0, y); gCtx.lineTo(w, y); gCtx.stroke();
-          gCtx.fillText(i.toString(), 14, y + 4);
         }
         tempCtx.drawImage(gridTemp, 0, 0);
       }
@@ -302,11 +282,7 @@
     }
 
     function startCrop() {
-      alert("Crop tool coming in the next update.");
-    }
-
-    function hideControls(hide) {
-      document.getElementById('gridControls').style.opacity = hide ? '0.15' : '1';
+      alert("Crop tool coming soon.");
     }
 
     function backToHome() {
