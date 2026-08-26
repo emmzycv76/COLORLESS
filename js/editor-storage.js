@@ -87,21 +87,23 @@
       if(el){el.addEventListener('input',()=>scheduleSave());el.addEventListener('change',()=>scheduleSave())}
     });
     ['numberGrid','thirdsGrid','goldenGrid','hideGrid'].forEach(id=>{
-      const el=document.getElementById(id);if(el)el.addEventListener('click',()=>saveNow());
+      const el=document.getElementById(id);if(el)el.addEventListener('click',()=>scheduleSave(0));
     });
     ['normalView','grayView','valueView','applySimplify','applyCrop','saveColorBtn','savePaletteBtn'].forEach(id=>{
       const el=document.getElementById(id);if(el)el.addEventListener('click',()=>scheduleSave(250));
     });
     image.addEventListener('load',()=>scheduleSave(250));
 
-    // Back must wait for IndexedDB to finish writing. A normal navigation can unload the
-    // page before an asynchronous IndexedDB transaction has completed.
+    // Any navigation from the editor back to Home must wait for the IndexedDB write.
+    // This covers the COLORLESS brand link, the explicit Back control, and any future
+    // Home links without depending on a particular button label.
     document.addEventListener('click',async e=>{
-      const target=e.target.closest && e.target.closest('button,a');
+      const target=e.target.closest && e.target.closest('a,button');
       if(!target)return;
+      const href=target.getAttribute('href')||'';
       const label=(target.textContent||'').trim().toLowerCase();
-      const isBack=target.id==='backBtn'||target.hasAttribute('data-back')||label==='← back'||label==='back';
-      if(!isBack)return;
+      const isHomeLink=/^(?:\.\/)?index\.html(?:[?#].*)?$/.test(href)||target.dataset.back==='true'||target.id==='backBtn'||label==='← back'||label==='back';
+      if(!isHomeLink)return;
       e.preventDefault();
       e.stopImmediatePropagation();
       clearTimeout(saveTimer);
