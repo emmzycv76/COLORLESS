@@ -1,110 +1,114 @@
-/* Persist COLORLESS editor state into IndexedDB. No server required. */
+/* COLORLESS editor project-state persistence — IndexedDB, no server required. */
 (function(){
-  const WAIT = 350;
-  let lastSaved = '';
-  let timer = null;
-
-  function projectId(){
-    try{return localStorage.getItem('colorlessProjectId') || ''}catch(e){return ''}
-  }
-
-  function currentState(){
-    const image=document.getElementById('editorImage');
-    if(!image || !image.src) return null;
-    let gridState=null;
-    try{ if(typeof grid!=='undefined') gridState={...grid}; }catch(e){}
-    let palette=[];
-    let savedColors=[];
-    try{ palette=JSON.parse(localStorage.getItem('colorlessPalette')||'[]'); }catch(e){}
-    try{ savedColors=JSON.parse(localStorage.getItem('colorlessSavedColors')||'[]'); }catch(e){}
-    return {
-      src:image.src,
-      filter:image.style.filter||'',
-      grid:gridState,
-      palette,
-      savedColors,
-      updatedAt:Date.now()
+  function whenReady(fn){
+    let tries=0;
+    const check=()=>{
+      tries++;
+      try{
+        if(window.COLORLESSStorage && document.getElementById('editorImage') && typeof grid!=='undefined') return fn();
+      }catch(e){}
+      if(tries<100)setTimeout(check,100);
     };
+    check();
   }
 
-  function signature(state){
-    if(!state)return '';
-    return JSON.stringify({src:state.src,filter:state.filter,grid:state.grid,palette:state.palette,savedColors:state.savedColors});
-  }
-
-  async function save(force){
-    const id=projectId();
-    if(!id || !window.COLORLESSStorage)return;
-    const state=currentState();
-    if(!state)return;
-    const sig=signature(state);
-    if(!force && sig===lastSaved)return;
-    try{
-      const existing=await COLORLESSStorage.getProject(id);
-      if(!existing)return;
-      await COLORLESSStorage.saveProject({...existing,...state,id,updatedAt:Date.now()});
-      lastSaved=sig;
-      try{localStorage.setItem('colorlessImage',state.src)}catch(e){}
-    }catch(e){}
-  }
-
-  function scheduleSave(){
-    clearTimeout(timer);
-    timer=setTimeout(()=>save(false),WAIT);
-  }
-
-  async function restore(){
-    const id=projectId();
-    if(!id || !window.COLORLESSStorage)return;
-    try{
-      const p=await COLORLESSStorage.getProject(id);
-      if(!p)return;
-      const image=document.getElementById('editorImage');
-      if(!image)return;
-      if(p.src && p.src!==image.src){
-        image.src=p.src;
-        try{localStorage.setItem('colorlessImage',p.src)}catch(e){}
-      }
-      if(typeof grid!=='undefined' && p.grid){
-        grid={...grid,...p.grid};
-        if(typeof syncGrid==='function')syncGrid();
-        if(typeof drawGrid==='function')drawGrid();
-      }
-      if(p.filter!==undefined)image.style.filter=p.filter||'';
-      if(Array.isArray(p.palette))try{localStorage.setItem('colorlessPalette',JSON.stringify(p.palette))}catch(e){}
-      if(Array.isArray(p.savedColors))try{localStorage.setItem('colorlessSavedColors',JSON.stringify(p.savedColors))}catch(e){}
-      if(typeof renderSaved==='function')renderSaved();
-      lastSaved=signature(currentState());
-    }catch(e){}
-  }
-
-  function observe(){
+  whenReady(async function(){
     const image=document.getElementById('editorImage');
-    if(!image)return;
-    const observer=new MutationObserver(scheduleSave);
-    observer.observe(image,{attributes:true,attributeFilter:['src','style']});
-    ['cols','rows','gridOpacity','gridColor','numberGrid','thirdsGrid','goldenGrid','hideGrid','normalView','grayView','valueView','applySimplify','applyCrop','saveColorBtn','savePaletteBtn'].forEach(id=>{
-      const el=document.getElementById(id); if(el)el.addEventListener('click',scheduleSave);
-    });
-    ['cols','rows','gridOpacity','gridColor','levels'].forEach(id=>{
-      const el=document.getElementById(id); if(el)el.addEventListener('input',scheduleSave);
-    });
-    image.addEventListener('load',scheduleSave);
-    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')save(true)});
-    window.addEventListener('pagehide',()=>save(true));
-    setInterval(()=>save(false),2500);
-  }
+    let projectId='';
+    let restoring=false;
+    let saveTimer=null;
 
-  async function init(){
-    if(!document.getElementById('editorImage'))return;
-    if(!window.COLORLESSStorage){
-      const s=document.createElement('script');s.src='js/storage.js';document.head.appendChild(s);
-      await new Promise(resolve=>{const start=Date.now();const check=()=>{if(window.COLORLESSStorage||Date.now()-start>3000)resolve();else setTimeout(check,25)};check()});
+    try{ projectId=localStorage.getItem('colorlessProjectId')||''; }catch(e){}
+
+    async function getProject(){
+      if(!projectId)return null;
+      return await COLORLESSStorage.getProject(projectId);
     }
-    await restore();
-    observe();
-    setTimeout(()=>save(true),500);
-  }
 
-  if(document.readyState==='complete')setTimeout(init,0);else window.addEventListener('load',()=>setTimeout(init,0));
+    function state(){
+      let palette=[];
+      let savedColors=[];
+      try{palette=JSON.parse(localStorage.getItem('colorlessPalette')||'[]')}catch(e){}
+      try{savedColors=JSON.parse(localStorage.getItem('colorlessSavedColors')||'[]')}catch(e){}
+      return {
+        src:image.src,
+        filter:image.style.filter||'',
+        grid:{...grid},
+        palette,
+        savedColors,
+        updatedAt:Date.now()
+      };
+    }
+
+    async function saveNow(){
+      if(restoring || !projectId || !window.COLORLESSStorage || !image.src)return;
+      try{
+        const existing=await getProject();
+        if(!existing)return;
+        const s=state();
+        await COLORLESSStorage.saveProject({...existing,...s,id:projectId,updatedAt:Date.now()});
+        try{localStorage.setItem('colorlessImage',s.src)}catch(e){}
+      }catch(e){console.warn('COLORLESS save failed',e)}
+    }
+
+    function scheduleSave(delay=150){
+      if(restoring)return;
+      clearTimeout(saveTimer);
+      saveTimer=setTimeout(saveNow,delay);
+    }
+
+    async function restore(){
+      if(!projectId)return;
+      const p=await getProject();
+      if(!p)return;
+      restoring=true;
+      try{
+        if(p.src && p.src!==image.src){
+          await new Promise(resolve=>{
+            const done=()=>resolve();
+            image.addEventListener('load',done,{once:true});
+            image.src=p.src;
+            if(image.complete)resolve();
+          });
+        }
+        if(p.filter!==undefined)image.style.filter=p.filter||'';
+        if(p.grid){
+          grid={...grid,...p.grid};
+          if(typeof syncGrid==='function')syncGrid();
+          if(typeof drawGrid==='function')drawGrid();
+        }
+        if(Array.isArray(p.palette)){
+          try{localStorage.setItem('colorlessPalette',JSON.stringify(p.palette))}catch(e){}
+        }
+        if(Array.isArray(p.savedColors)){
+          try{localStorage.setItem('colorlessSavedColors',JSON.stringify(p.savedColors))}catch(e){}
+          if(typeof renderSaved==='function')renderSaved();
+        }
+        try{localStorage.setItem('colorlessImage',image.src)}catch(e){}
+      }finally{
+        restoring=false;
+      }
+    }
+
+    if(document.readyState==='complete'){
+      setTimeout(restore,50);
+    }else{
+      window.addEventListener('load',()=>setTimeout(restore,50),{once:true});
+    }
+
+    ['cols','rows','gridOpacity','gridColor'].forEach(id=>{
+      const el=document.getElementById(id);
+      if(el){el.addEventListener('input',()=>scheduleSave());el.addEventListener('change',()=>scheduleSave())}
+    });
+    ['numberGrid','thirdsGrid','goldenGrid','hideGrid'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.addEventListener('click',()=>scheduleSave(200));
+    });
+    ['normalView','grayView','valueView','applySimplify','applyCrop','saveColorBtn','savePaletteBtn'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.addEventListener('click',()=>scheduleSave(250));
+    });
+    image.addEventListener('load',()=>scheduleSave(250));
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')saveNow()});
+    window.addEventListener('pagehide',()=>saveNow());
+    window.COLORLESSProjectSave=saveNow;
+  });
 })();
