@@ -1,197 +1,38 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Colorless</title>
-  <style>
-    body { margin:0; font-family: Arial; background: #111; color: white; text-align:center; padding:10px; }
-    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; cursor: pointer; }
-    .logo { width: 48px; height: 48px; margin-right: 10px; }
-    .header h1 { display: flex; align-items: center; margin: 0; }
-    .container { position:relative; display:inline-block; max-width:600px; margin:20px auto; }
-    img { width:100%; border:2px solid #fff; border-radius:12px; }
-    button { padding:12px 20px; margin:8px; font-size:16px; border:none; border-radius:50px; background:#ff4d4d; color:white; cursor:pointer; }
-    .mixer, .feedback { padding:15px; background:#222; margin:10px; border-radius:12px; }
-    .color-swatch { width:55px; height:55px; margin:6px; border:3px solid white; border-radius:12px; display:inline-block; cursor:pointer; }
-
-    /* Side Menu */
-    .menu { 
-      position:fixed; top:0; left:-300px; width:280px; height:100%; 
-      background:#1a1a1a; transition:0.3s; padding:20px; z-index:104; 
-      box-shadow:2px 0 10px rgba(0,0,0,0.5); 
-    }
-    .menu.open { left:0; }
-
-    footer { 
-      margin-top:30px; padding:15px; font-size:12px; color:#666; 
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>COLORLESS — Artist Reference</title>
+<link rel="stylesheet" href="css/app.css">
+<style>
+.mixer-card,.recent-card{max-width:620px;margin:18px auto}.mixer-toggle{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left}.mixer-body{display:none;margin-top:10px}.mixer-body.open{display:block}.recent-head{display:flex;align-items:center;justify-content:space-between;gap:12px}.recent-head h2{font-size:16px;margin:0}.recent-actions{display:flex;gap:6px}.recent-actions button{font-size:12px;padding:7px 10px}.recent-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}.recent-item{position:relative;border:1px solid #29292e;border-radius:14px;overflow:hidden;background:#17171b;padding:0;color:inherit;text-align:left}.recent-thumb{position:relative}.recent-item img{display:block;width:100%;aspect-ratio:4/3;object-fit:cover}.recent-open{position:absolute;left:9px;bottom:9px;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.25);border-radius:9px;padding:6px 9px;font-size:12px}.recent-meta{padding:9px 10px 10px}.recent-title{display:block;font-size:13px;font-weight:600}.recent-time{display:block;padding-top:3px;color:#888;font-size:11px}.recent-delete{position:absolute;right:8px;top:8px;width:30px;height:30px;padding:0;border-radius:50%;background:rgba(0,0,0,.72);border:1px solid rgba(255,255,255,.22);color:#fff;font-size:14px;z-index:2}.recent-empty{color:#888;font-size:13px;padding:12px 2px}.recent-error{color:#ff9a9a;font-size:13px;padding:12px 2px}.feedback-wrap{max-width:620px;margin:30px auto 8px;text-align:left}.feedback-wrap h2{text-align:center;font-size:16px;margin:0 0 6px}.feedback-wrap>p{text-align:center;color:#888;font-size:12px;margin:0 0 12px}.feedback-form{background:#17171b;border:1px solid #29292e;border-radius:18px;padding:14px}.feedback-form textarea{box-sizing:border-box;width:100%;min-height:120px;resize:vertical;background:#0f0f12;color:#fff;border:1px solid #333;border-radius:12px;padding:12px;outline:none}.feedback-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px;margin-top:10px}.feedback-status{font-size:12px;color:#888;margin-right:auto}.feedback-status.success{color:#aaa}.feedback-status.error{color:#ff8b8b}.feedback-form button{min-width:82px}.mixer-swatches{display:flex;flex-wrap:wrap;justify-content:center;gap:6px}.mixer-swatch{width:42px;height:42px;border-radius:10px;border:2px solid #fff;cursor:pointer}.mix-result{min-height:80px;text-align:center;padding:12px}.mix-result .mixer-swatch{width:90px;height:90px;margin:auto}.about-icon{width:38px;height:38px;padding:0;border-radius:50%;font-size:19px;margin:0}@media(max-width:520px){.recent-grid{grid-template-columns:1fr 1fr;gap:9px}.recent-meta{padding:8px}.recent-open{font-size:11px;padding:5px 7px}}
+</style>
 </head>
 <body>
-  <div class="header" onclick="toggleMenu()">
-    <h1>
-      <img src="https://github.com/emmzycv76/COLORLESS/raw/refs/heads/main/IMG_5615.jpeg" 
-           class="logo" alt="Colorless Logo">
-      Colorless
-    </h1>
-  </div>
-
-  <!-- Side Menu -->
-  <div id="sideMenu" class="menu">
-    <h2>Menu</h2>
-    <button onclick="goToPage('index.html')">🏠 Home</button>
-    <button onclick="goToPage('editor.html')">✏️ Editor</button>
-    <button onclick="goToPage('about.html')">ℹ️ About</button>
-    <button onclick="goToPage('faq.html')">❓ FAQ</button>
-    <button onclick="goToPage('terms.html')">📜 Terms</button>
-    <button onclick="closeMenu()">Close Menu</button>
-  </div>
-
-  <input type="file" id="fileInput" accept="image/*" style="display:none;">
-  <button onclick="document.getElementById('fileInput').click()">📁 Upload Photo</button>
-
-  <div class="container">
-    <img id="mainImage" style="display:none;">
-  </div>
-
-  <div class="mixer">
-    <h3>🎨 Color Mixer</h3>
-    <div id="palette"></div>
-    <div id="mixedResult" style="margin:20px 0; min-height:120px;"></div>
-    <button onclick="clearMix()">Clear Mixer</button>
-  </div>
-
-  <div class="feedback">
-    <h3>💬 Send Feedback</h3>
-    <textarea id="feedbackText" placeholder="How can we make Colorless better?" style="width:90%; height:80px; background:#333; color:white; border:none; border-radius:8px; padding:10px;"></textarea>
-    <button onclick="sendFeedback()">Send Feedback</button>
-  </div>
-
-  <footer>
-    © 2026 Colorless. All rights reserved.<br>
-    Made with ❤️ for artists worldwide.
-  </footer>
-
-  <script>
-    let pickedColors = [];
-
-    const paletteColors = [
-      {name:"Red", hex:"#FF0000"}, {name:"Cadmium Red", hex:"#E30000"},
-      {name:"Yellow", hex:"#FFFF00"}, {name:"Orange", hex:"#FF7F00"},
-      {name:"Green", hex:"#00FF00"}, {name:"Blue", hex:"#0000FF"},
-      {name:"Ultramarine", hex:"#3F00FF"}, {name:"Purple", hex:"#800080"},
-      {name:"Pink", hex:"#FF69B4"}, {name:"Brown", hex:"#8B4513"},
-      {name:"Black", hex:"#000000"}, {name:"White", hex:"#FFFFFF"},
-      {name:"Gray", hex:"#808080"}
-    ];
-
-    const paletteDiv = document.getElementById('palette');
-    paletteColors.forEach(c => {
-      const sw = document.createElement('div');
-      sw.className = 'color-swatch';
-      sw.style.background = c.hex;
-      sw.title = c.name;
-      sw.onclick = () => addToMix(c);
-      paletteDiv.appendChild(sw);
-    });
-
-    function addToMix(c) {
-      pickedColors.push(c);
-      if (pickedColors.length > 8) pickedColors.shift();
-      updateMix();
-    }
-
-    function updateMix() {
-      const result = document.getElementById('mixedResult');
-      if (pickedColors.length === 0) {
-        result.innerHTML = '<p>Tap swatches to mix colors</p>';
-        return;
-      }
-
-      let r = 0, g = 0, b = 0;
-      pickedColors.forEach(c => {
-        const h = c.hex.replace('#','');
-        r += parseInt(h.substr(0,2), 16);
-        g += parseInt(h.substr(2,2), 16);
-        b += parseInt(h.substr(4,2), 16);
-      });
-
-      r = Math.floor(r / pickedColors.length);
-      g = Math.floor(g / pickedColors.length);
-      b = Math.floor(b / pickedColors.length);
-
-      const hex = '#' + [r,g,b].map(x => x.toString(16).padStart(2,'0')).join('').toUpperCase();
-      const mixedName = getMixedColorName(r, g, b);
-
-      result.innerHTML = `
-        <div class="color-swatch" style="background:${hex}; width:110px; height:110px; display:block; margin:10px auto;"></div>
-        <strong>${hex}</strong><br>
-        <small>${mixedName}</small>
-      `;
-    }
-
-    function getMixedColorName(r, g, b) {
-      if (r > 200 && g < 110 && b < 110) return "Reddish";
-      if (g > 180 && r < 120 && b < 120) return "Greenish";
-      if (b > 180 && r < 120 && g < 120) return "Bluish";
-      if (r > 200 && g > 170 && b < 100) return "Yellowish";
-      if (r > 160 && g < 100 && b > 140) return "Purplish";
-      if (r > 200 && g > 100 && b < 80) return "Orange";
-      if (r < 60 && g < 60 && b < 60) return "Dark";
-      if (r > 220 && g > 220 && b > 220) return "Light / White";
-      return "Mixed Color";
-    }
-
-    function clearMix() {
-      pickedColors = [];
-      updateMix();
-    }
-
-    function sendFeedback() {
-      const text = document.getElementById('feedbackText').value.trim();
-      if (!text) {
-        alert("Please write something before sending.");
-        return;
-      }
-
-      fetch('https://formspree.io/f/xjgqpqav', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feedback: text, page: "Main Page" })
-      }).then(() => {
-        alert("✅ Thank you! Feedback received.");
-        document.getElementById('feedbackText').value = '';
-      }).catch(() => {
-        alert("Feedback saved (you might be offline).");
-      });
-    }
-
-    // Menu Functions
-    function toggleMenu() {
-      document.getElementById('sideMenu').classList.toggle('open');
-    }
-
-    function closeMenu() {
-      document.getElementById('sideMenu').classList.remove('open');
-    }
-
-    function goToPage(page) {
-      closeMenu();
-      window.location.href = page;
-    }
-
-    // Upload handler
-    document.getElementById('fileInput').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = ev => {
-        localStorage.setItem('colorlessImage', ev.target.result);
-        window.location.href = 'editor.html';
-      };
-      reader.readAsDataURL(file);
-    });
-  </script>
+<header class="app-header"><a class="brand" href="index.html" style="color:inherit;text-decoration:none"><img src="IMG_5615.jpeg" alt="">COLORLESS</a><button class="about-icon" aria-label="About COLORLESS" title="About" onclick="location.href='about.html'">ⓘ</button></header>
+<main class="page">
+<section class="hero"><h1>Turn photos into painting guides.</h1><label class="upload"><input id="file" type="file" accept="image/*">📷 Upload a reference photo</label></section>
+<section class="card recent-card"><div class="recent-head"><h2>Recent projects</h2><div class="recent-actions"><button id="clearRecent" type="button" hidden>Clear all</button></div></div><div class="recent-grid" id="recentProjects"></div></section>
+<section class="card mixer-card"><button class="mixer-toggle" id="mixerToggle" type="button"><span>🎨 Color Mixer<br><small style="color:#888">Experiment with colors before painting.</small></span><span id="mixerChevron">▾</span></button><div class="mixer-body" id="mixerBody"><div class="mixer-swatches" id="mixerPalette"></div><div class="mix-result" id="mixResult"><span style="color:#888">Tap swatches to mix colors</span></div><button type="button" onclick="clearMix()">Clear Mixer</button></div></section>
+<div class="feedback-wrap"><h2>Feedback</h2><p>Tell us what you think or what we can improve.</p><form class="feedback-form" id="feedbackForm" action="https://formspree.io/f/xjgqpqav" method="POST"><textarea id="feedbackMessage" name="message" placeholder="Write your feedback..." required></textarea><div class="feedback-actions"><span class="feedback-status" id="feedbackStatus" aria-live="polite"></span><button type="submit" class="primary" id="feedbackSend">Send</button></div></form></div>
+<footer class="footer">© 2026 COLORLESS · Made for artists worldwide.</footer>
+</main>
+<script src="js/storage.js"></script>
+<script>
+const f=document.querySelector('#file');const MAX_EDGE=1800;
+function readImage(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
+function compressImage(src){return new Promise(resolve=>{const im=new Image();im.onload=()=>{if(Math.max(im.naturalWidth,im.naturalHeight)<=MAX_EDGE&&src.length<1200000){resolve(src);return}const scale=Math.min(1,MAX_EDGE/Math.max(im.naturalWidth,im.naturalHeight));const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.naturalWidth*scale));c.height=Math.max(1,Math.round(im.naturalHeight*scale));const ctx=c.getContext('2d');ctx.drawImage(im,0,0,c.width,c.height);resolve(c.toDataURL('image/jpeg',.82))};im.onerror=()=>resolve(src);im.src=src})}
+async function openEditor(){const file=f.files&&f.files[0];if(!file)return;try{f.disabled=true;const raw=await readImage(file);const src=await compressImage(raw);const now=Date.now();let project=null;try{project=await COLORLESSStorage.saveProject({src,title:file.name.replace(/\.[^.]+$/,'').slice(0,60)||'Reference',palette:[],grid:null,notes:'',createdAt:now,updatedAt:now})}catch(e){}try{localStorage.setItem('colorlessImage',src)}catch(e){}if(project){try{localStorage.setItem('colorlessProjectId',project.id)}catch(e){}}location.assign('editor.html')}catch(e){alert('This image could not be loaded. Please try another image.')}finally{f.disabled=false}}
+f.addEventListener('change',openEditor);
+function timeAgo(t){const d=Math.max(0,Date.now()-Number(t||0)),m=Math.floor(d/60000),h=Math.floor(d/3600000),days=Math.floor(d/86400000);if(m<1)return'Just now';if(m<60)return m+' min ago';if(h<24)return h+' hr ago';if(days<7)return days+' day'+(days===1?'':'s')+' ago';return new Date(t).toLocaleDateString(undefined,{month:'short',day:'numeric'})}
+async function renderRecent(){const box=document.querySelector('#recentProjects'),clear=document.querySelector('#clearRecent');try{const a=await COLORLESSStorage.migrateLegacy();if(!a.length){box.innerHTML='<div class="recent-empty">Your recent references will appear here after you upload one.</div>';clear.hidden=true;return}clear.hidden=false;box.innerHTML=a.map((p,i)=>`<article class="recent-item"><button class="recent-delete" type="button" aria-label="Delete project ${i+1}" onclick="deleteRecent(event,'${p.id}')">×</button><button type="button" style="display:block;width:100%;padding:0;border:0;background:none;color:inherit;text-align:left" onclick="openRecent('${p.id}')"><div class="recent-thumb"><img src="${p.src}" alt="${(p.title||'Recent project').replace(/"/g,'&quot;')}"><span class="recent-open">Open project</span></div><div class="recent-meta"><span class="recent-title">${p.title||'Reference'}</span><span class="recent-time">${timeAgo(p.updatedAt)}</span></div></button></article>`).join('')}catch(e){box.innerHTML='<div class="recent-error">Recent projects are temporarily unavailable. Your upload still works.</div>';clear.hidden=true}}
+async function openRecent(id){try{const p=await COLORLESSStorage.getProject(id);if(!p)return;localStorage.setItem('colorlessImage',p.src);localStorage.setItem('colorlessProjectId',p.id);await COLORLESSStorage.saveProject({...p,updatedAt:Date.now()});location.assign('editor.html')}catch(e){alert('This project could not be opened. Please try uploading the reference again.')}}
+async function deleteRecent(e,id){e.stopPropagation();try{await COLORLESSStorage.deleteProject(id);if(localStorage.getItem('colorlessProjectId')===id)localStorage.removeItem('colorlessProjectId');renderRecent()}catch(err){alert('Could not delete this project.')}}
+document.querySelector('#clearRecent').onclick=async()=>{if(confirm('Clear all recent projects?')){await COLORLESSStorage.clearProjects();localStorage.removeItem('colorlessRecentProjects');localStorage.removeItem('colorlessProjectId');renderRecent()}};renderRecent();setInterval(renderRecent,60000);
+const mixerToggle=document.querySelector('#mixerToggle'),mixerBody=document.querySelector('#mixerBody'),mixerChevron=document.querySelector('#mixerChevron');mixerToggle.onclick=()=>{mixerBody.classList.toggle('open');mixerChevron.textContent=mixerBody.classList.contains('open')?'▴':'▾'};
+let picked=[];const colors=['#FF0000','#E30000','#FFFF00','#FF7F00','#00FF00','#0000FF','#3F00FF','#800080','#FF69B4','#8B4513','#000000','#FFFFFF','#808080'];const palette=document.querySelector('#mixerPalette');colors.forEach(hex=>{const s=document.createElement('button');s.type='button';s.className='mixer-swatch';s.style.background=hex;s.setAttribute('aria-label','Mix '+hex);s.onclick=()=>addMix(hex);palette.appendChild(s)});function addMix(hex){picked.push(hex);if(picked.length>8)picked.shift();const rgb=picked.map(h=>[parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)]);const avg=rgb.reduce((a,v)=>a.map((x,i)=>x+v[i]),[0,0,0]).map(v=>Math.round(v/rgb.length));const mixed='#'+avg.map(v=>v.toString(16).padStart(2,'0')).join('').toUpperCase();document.querySelector('#mixResult').innerHTML='<div class="mixer-swatch" style="background:'+mixed+'"></div><strong>'+mixed+'</strong>'}function clearMix(){picked=[];document.querySelector('#mixResult').innerHTML='<span style="color:#888">Tap swatches to mix colors</span>'}
+const feedbackForm=document.querySelector('#feedbackForm'),feedbackMessage=document.querySelector('#feedbackMessage'),feedbackSend=document.querySelector('#feedbackSend'),feedbackStatus=document.querySelector('#feedbackStatus');feedbackForm.addEventListener('submit',async e=>{e.preventDefault();if(!feedbackMessage.value.trim())return;feedbackSend.disabled=true;feedbackStatus.textContent='Sending…';feedbackStatus.className='feedback-status';try{const response=await fetch(feedbackForm.action,{method:'POST',headers:{Accept:'application/json','Content-Type':'application/json'},body:JSON.stringify({message:feedbackMessage.value.trim()})});if(!response.ok)throw new Error();feedbackMessage.value='';feedbackStatus.textContent='Sent ✓';feedbackStatus.className='feedback-status success'}catch(error){feedbackStatus.textContent='Couldn’t send. Please try again.';feedbackStatus.className='feedback-status error'}finally{feedbackSend.disabled=false}});
+</script>
 </body>
 </html>

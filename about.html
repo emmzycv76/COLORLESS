@@ -1,49 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>About - Colorless</title>
   <style>
-    body { margin:0; font-family: Arial; background: #111; color: white; padding:15px; line-height:1.6; }
-    .header { display:flex; justify-content:space-between; align-items:center; padding:10px; background:#1a1a1a; cursor:pointer; }
-    .logo { width: 45px; height: 45px; margin-right: 10px; }
-    .header h1 { display: flex; align-items: center; margin: 0; }
-    .menu { position:fixed; top:0; left:-300px; width:280px; height:100%; background:#1a1a1a; transition:0.3s; padding:20px; z-index:104; box-shadow:2px 0 10px rgba(0,0,0,0.5); }
-    .menu.open { left:0; }
+    body{margin:0;font-family:Arial,sans-serif;background:#111;color:white;padding:15px;line-height:1.6}.header{display:flex;align-items:center;padding:10px;background:#1a1a1a;cursor:pointer}.logo{width:45px;height:45px;margin-right:10px}.header h1{display:flex;align-items:center;margin:0}.menu{position:fixed;top:0;left:-300px;width:280px;height:100%;background:#1a1a1a;transition:.3s;padding:20px;z-index:104;box-shadow:2px 0 10px rgba(0,0,0,.5)}.menu.open{left:0}.tool{padding:14px 0;border-bottom:1px solid #2a2a2a}.tool h3{margin:0 0 4px}.muted{color:#aaa}.back{margin-top:24px}
   </style>
 </head>
 <body>
-  <div class="header" onclick="toggleMenu()">
-    <h1>
-      <img src="https://github.com/emmzycv76/COLORLESS/raw/refs/heads/main/IMG_5615.jpeg" class="logo" alt="Logo">
-      Colorless
-    </h1>
-  </div>
-
-  <div id="sideMenu" class="menu">
-    <h2>Menu</h2>
-    <button onclick="goToPage('index.html')">🏠 Home</button>
-    <button onclick="goToPage('editor.html')">✏️ Editor</button>
-    <button onclick="goToPage('about.html')">ℹ️ About</button>
-    <button onclick="goToPage('faq.html')">❓ FAQ</button>
-    <button onclick="goToPage('terms.html')">📜 Terms</button>
-    <button onclick="closeMenu()">Close</button>
-  </div>
-
+  <div class="header" onclick="toggleMenu()"><h1><img src="https://github.com/emmzycv76/COLORLESS/raw/refs/heads/main/IMG_5615.jpeg" class="logo" alt="Logo">Colorless</h1></div>
+  <div id="sideMenu" class="menu"><h2>Menu</h2><button onclick="goToPage('index.html')">🏠 Home</button><button onclick="goToPage('editor.html')">✏️ Editor</button><button onclick="goToPage('about.html')">ℹ️ About</button><button onclick="goToPage('faq.html')">❓ FAQ</button><button onclick="goToPage('terms.html')">📜 Terms</button><button onclick="closeMenu()">Close</button></div>
   <h2>About Colorless</h2>
-  <p>Colorless is a free tool designed for artists, illustrators, and creatives who want to analyze colors from reference photos and use a precise grid for transferring artwork to traditional media.</p>
-  <p>Everything runs locally in your browser — no images are uploaded or stored.</p>
-
-  <button onclick="goToPage('index.html')">← Back to Home</button>
-
-  <script>
-    function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); }
-    function closeMenu() { document.getElementById('sideMenu').classList.remove('open'); }
-    function goToPage(page) {
-      closeMenu();
-      window.location.href = page;
-    }
-  </script>
-</body>
-</html>
+  <p>Colorless is a free reference workspace for artists, illustrators, and creatives who want to understand a reference before drawing or painting.</p>
+  <p class="muted">Identify colors, extract palettes, study values, simplify references, and build precise drawing grids — all in one focused workspace.</p>
+  <h2>What the tools are for</h2>
+  <div class="tool"><h3>🎨 Color ID</h3><div class="muted">Pick a point in your reference to study its exact color.</div></div>
+  <div class="tool"><h3>▦ Grid</h3><div class="muted">Use a grid to transfer proportions and placement accurately from your reference to your canvas.</div></div>
+  <div class="tool"><h3>✂️ Crop</h3><div class="muted">Frame your reference to match your canvas or focus attention on the composition.</div></div>
+  <div class="tool"><h3>✨ Palette</h3><div class="muted">Extract key colors from your reference and study their relationships before you start mixing paint.</div></div>
+  <div class="tool"><h3>◐ Value</h3><div class="muted">Reduce color so you can concentrate on light, midtones, and shadows.</div></div>
+  <div class="tool"><h3>◒ Simplify</h3><div class="muted">Reduce visual detail into larger shapes so the main forms and values are easier to understand.</div></div>
+  <div class="tool"><h3>🎨 Color Mixer</h3><div class="muted">Experiment with colors before committing them to your artwork.</div></div>
+  <button class="back" onclick="goToPage('index.html')">← Back to Home</button>
+  <script>function toggleMenu(){document.getElementById('sideMenu').classList.toggle('open')}function closeMenu(){document.getElementById('sideMenu').classList.remove('open')}function goToPage(page){closeMenu();window.location.href=page}</script>
+</body></html>
